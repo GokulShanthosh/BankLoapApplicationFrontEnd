@@ -1,24 +1,27 @@
 // auth.service.ts
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 export interface User {
-  id: string;
+  _id: string;
+  name: string;
   email: string;
-  username: string;
   role: string;
 }
 
 export interface AuthResponse {
+  status: string;
   token: string;
-  user: User;
+  data: {
+    user: User;
+  };
 }
 
 export interface SignupRequest {
+  name: string;
   email: string;
-  username: string;
   password: string;
   confirmPassword: string;
 }
@@ -38,12 +41,19 @@ export interface ResetPasswordRequest {
   confirmPassword: string;
 }
 
+export interface UpdatePasswordRequest {
+  passwordCurrent: string;
+  password: string;
+  confirmPassword: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = 'http://localhost:3000/api/v1/users'; // Update with your backend URL
   private tokenKey = 'auth_token';
+  private userKey = 'user';
   private userSubject = new BehaviorSubject<User | null>(null);
 
   public user$ = this.userSubject.asObservable();
@@ -51,34 +61,26 @@ export class AuthService {
   private http = inject(HttpClient);
 
   constructor() {
-    this.loadToken();
+    this.loadUserFromLocalStorage();
   }
 
-  // Load token from localStorage and validate on init
-  private loadToken(): void {
-    const token = localStorage.getItem(this.tokenKey);
-    if (token) {
-      this.validateToken().subscribe({
-        next: (response) => {
-          this.userSubject.next(response.user);
-        },
-        error: () => {
-          // Token invalid or expired
-          this.logout();
-        },
-      });
+  private loadUserFromLocalStorage(): void {
+    const userString = localStorage.getItem(this.userKey);
+    if (userString) {
+      try {
+        const user = JSON.parse(userString) as User;
+        this.userSubject.next(user);
+      } catch (error) {
+        console.error('Error parsing user from local storage:', error);
+        this.logout();
+      }
     }
-  }
-
-  // Validate the current token
-  validateToken(): Observable<AuthResponse> {
-    return this.http.get<AuthResponse>(`${this.apiUrl}/validate-token`);
   }
 
   // Register a new user
   signup(signupData: SignupRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/signup`, signupData)
+      .post<AuthResponse>(`${this.apiUrl}/signUp`, signupData)
       .pipe(
         tap((response) => {
           this.setSession(response);
@@ -98,26 +100,35 @@ export class AuthService {
   // Send forgot password request
   forgotPassword(
     forgotPasswordData: ForgotPasswordRequest
-  ): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.apiUrl}/forgot-password`,
+  ): Observable<{ status: string; message: string }> {
+    return this.http.post<{ status: string; message: string }>(
+      `${this.apiUrl}/forgotPassword`,
       forgotPasswordData
     );
   }
 
   // Reset password with token
-  resetPassword(
-    resetData: ResetPasswordRequest
-  ): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.apiUrl}/reset-password`,
-      resetData
+  resetPassword(resetData: ResetPasswordRequest): Observable<AuthResponse> {
+    return this.http.patch<AuthResponse>( // Using http.patch
+      `${this.apiUrl}/resetPassword/${resetData.token}`,
+      {
+        password: resetData.password,
+        confirmPassword: resetData.confirmPassword,
+      }
+    );
+  }
+  // Update user password
+  updatePassword(updateData: UpdatePasswordRequest): Observable<AuthResponse> {
+    return this.http.patch<AuthResponse>(
+      `${this.apiUrl}/updatePassword`,
+      updateData
     );
   }
 
   // Logout user
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
   }
 
@@ -134,7 +145,8 @@ export class AuthService {
   // Set session data after successful authentication
   private setSession(authResult: AuthResponse): void {
     localStorage.setItem(this.tokenKey, authResult.token);
-    this.userSubject.next(authResult.user);
+    localStorage.setItem(this.userKey, JSON.stringify(authResult.data.user));
+    this.userSubject.next(authResult.data.user);
   }
 
   // Get the current authenticated user

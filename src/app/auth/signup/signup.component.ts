@@ -31,8 +31,8 @@ export class SignupComponent {
   constructor() {
     this.signupForm = this.fb.group(
       {
+        name: ['', [Validators.required, Validators.minLength(3)]], // Added name field
         email: ['', [Validators.required, Validators.email]],
-        username: ['', [Validators.required, Validators.minLength(3)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
       },
@@ -62,13 +62,16 @@ export class SignupComponent {
     this.errorMessage = null;
 
     this.authService.signup(this.signupForm.value).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
+      next: (response) => {
+        // Handle the successful signup response
+        console.log('Signup successful', response);
+        this.router.navigate(['/dashboard']); // Redirect to dashboard
       },
       error: (error) => {
         this.isSubmitting = false;
         this.errorMessage =
           error.error?.message || 'Registration failed. Please try again.';
+        console.error('Signup error', error);
       },
     });
   }

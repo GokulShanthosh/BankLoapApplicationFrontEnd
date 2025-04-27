@@ -44,7 +44,7 @@ export class LoginComponent {
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        const userRole = response.user.role;
+        const userRole = response.data.user.role; // Access role from response.data.user
 
         if (userRole === 'admin') {
           this.router.navigate(['/admin-dashboard']);

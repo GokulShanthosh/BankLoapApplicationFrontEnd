@@ -1,10 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -17,7 +16,7 @@ import { AuthService } from '../../../service/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
-export class ForgotPasswordComponent implements OnInit {
+export class ForgotPasswordComponent {
   forgotPasswordForm: FormGroup;
   isSubmitting = false;
   errorMessage: string | null = null;
@@ -29,15 +28,7 @@ export class ForgotPasswordComponent implements OnInit {
 
   constructor() {
     this.forgotPasswordForm = this.fb.group({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      token: new FormControl('', [Validators.required]), // Add token field
-    });
-  }
-
-  ngOnInit(): void {
-    this.forgotPasswordForm = this.fb.group({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      token: new FormControl('', [Validators.required]), // Add token field
+      email: ['', [Validators.required, Validators.email]],
     });
   }
 
@@ -50,7 +41,7 @@ export class ForgotPasswordComponent implements OnInit {
     this.errorMessage = null;
     this.successMessage = null;
 
-    const { email, token } = this.forgotPasswordForm.value;
+    const { email } = this.forgotPasswordForm.value;
 
     this.authService.forgotPassword({ email }).subscribe({
       next: (response) => {
@@ -59,9 +50,8 @@ export class ForgotPasswordComponent implements OnInit {
           response.message ||
           'Password reset instructions have been sent to your email.';
         this.forgotPasswordForm.reset();
-
-        // Navigate to reset password component with token
-        this.router.navigate(['/reset-password'], { queryParams: { token } });
+        // Optionally navigate to a "check your email" page
+        // this.router.navigate(['/check-email']);
       },
       error: (error) => {
         this.isSubmitting = false;

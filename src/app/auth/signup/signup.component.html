@@ -1,1 +1,87 @@
-<p>signup works!</p>
+<form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="name">Name:</label>
+    <input type="text" id="name" formControlName="name" />
+    <div
+      *ngIf="
+        signupForm.controls['name'].invalid &&
+        (signupForm.controls['name'].dirty ||
+          signupForm.controls['name'].touched)
+      "
+    >
+      <div *ngIf="signupForm.controls['name'].errors?.['required']">
+        Name is required.
+      </div>
+      <div *ngIf="signupForm.controls['name'].errors?.['minlength']">
+        Name must be at least 3 characters long.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" id="email" formControlName="email" />
+    <div
+      *ngIf="
+        signupForm.controls['email'].invalid &&
+        (signupForm.controls['email'].dirty ||
+          signupForm.controls['email'].touched)
+      "
+    >
+      <div *ngIf="signupForm.controls['email'].errors?.['required']">
+        Email is required.
+      </div>
+      <div *ngIf="signupForm.controls['email'].errors?.['email']">
+        Enter a valid email.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" formControlName="password" />
+    <div
+      *ngIf="
+        signupForm.controls['password'].invalid &&
+        (signupForm.controls['password'].dirty ||
+          signupForm.controls['password'].touched)
+      "
+    >
+      <div *ngIf="signupForm.controls['password'].errors?.['required']">
+        Password is required.
+      </div>
+      <div *ngIf="signupForm.controls['password'].errors?.['minlength']">
+        Password must be at least 6 characters long.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <label for="confirmPassword">Confirm Password:</label>
+    <input
+      type="password"
+      id="confirmPassword"
+      formControlName="confirmPassword"
+    />
+    <div
+      *ngIf="
+        signupForm.controls['confirmPassword'].invalid &&
+        (signupForm.controls['confirmPassword'].dirty ||
+          signupForm.controls['confirmPassword'].touched)
+      "
+    >
+      <div *ngIf="signupForm.controls['confirmPassword'].errors?.['required']">
+        Confirm Password is required.
+      </div>
+      <div
+        *ngIf="signupForm.controls['confirmPassword'].errors?.['passwordMismatch']"
+      >
+        Passwords do not match.
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" [disabled]="isSubmitting">Sign Up</button>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <p>Already have an account? <a routerLink="/login">Log In</a></p>
+</form>

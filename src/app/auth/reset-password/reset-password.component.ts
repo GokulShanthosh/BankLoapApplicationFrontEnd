@@ -24,7 +24,7 @@ export class ResetPasswordComponent implements OnInit {
   isSubmitting = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
-  token: string = '';
+  token: string | null = null;
   tokenValid = true;
 
   private fb = inject(FormBuilder);
@@ -43,14 +43,13 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get token from the URL
-    this.route.queryParams.subscribe((params) => {
+    // Get token from the URL parameters
+    this.route.params.subscribe((params) => {
       this.token = params['token'];
-
       if (!this.token) {
         this.tokenValid = false;
         this.errorMessage =
-          'Invalid or missing reset token. Please request a new password reset.';
+          'Invalid or missing reset token. Please use the link from your email.';
       }
     });
   }
@@ -69,7 +68,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.resetPasswordForm.invalid || !this.token) {
+    if (this.resetPasswordForm.invalid || !this.tokenValid || !this.token) {
       return;
     }
 
@@ -86,11 +85,8 @@ export class ResetPasswordComponent implements OnInit {
     this.authService.resetPassword(resetData).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        this.successMessage =
-          response.message || 'Your password has been successfully reset.';
+        this.successMessage = 'Your password has been successfully reset.';
         this.resetPasswordForm.reset();
-
-        // Redirect to login page after 3 seconds
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
