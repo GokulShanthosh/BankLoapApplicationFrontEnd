@@ -1,1 +1,86 @@
-<p>admin-dashboard works!</p>
+<!-- admin-dashboard.component.html -->
+<div class="admin-dashboard">
+    <h1>Admin Dashboard</h1>
+    <p>Manage loan applications and approve or reject requests.</p>
+  
+    <div class="filters">
+      <div class="search-bar">
+        <input 
+          type="text" 
+          placeholder="Search by name, ID, phone, or email" 
+          [(ngModel)]="searchTerm"
+        >
+      </div>
+      <div class="status-filter">
+        <label for="status">Filter by Status:</label>
+        <select id="status" [(ngModel)]="statusFilter">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+  
+    <div *ngIf="loading" class="loading">
+      <p>Loading applications...</p>
+    </div>
+  
+    <div *ngIf="error" class="error-message">
+      <p>{{ error }}</p>
+      <button (click)="fetchAllForms()">Try Again</button>
+    </div>
+  
+    <div *ngIf="!loading && !error && filteredForms().length === 0" class="no-applications">
+      <p>No loan applications found.</p>
+    </div>
+  
+    <div *ngIf="!loading && !error && filteredForms().length > 0" class="applications-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Application ID</th>
+            <th>Applicant Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Loan Amount</th>
+            <th>Purpose</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let form of filteredForms()">
+            <td>{{ form.applicationId }}</td>
+            <td>{{ form.applicantName }}</td>
+            <td>{{ form.emailId }}</td>
+            <td>{{ form.phoneNumber }}</td>
+            <td>{{ form.loanAmount | currency:'INR' }}</td>
+            <td>{{ form.loanPurpose }}</td>
+            <td>
+              <span [ngClass]="form.status?.toLowerCase()">{{ form.status }}</span>
+            </td>
+            <td class="actions">
+              <button 
+                *ngIf="form.status === 'Pending'"
+                class="approve-btn" 
+                (click)="approveOrRejectLoan(form.applicationId!, 'Approved')"
+                [disabled]="loading"
+              >
+                Approve
+              </button>
+              <button 
+                *ngIf="form.status === 'Pending'"
+                class="reject-btn" 
+                (click)="approveOrRejectLoan(form.applicationId!, 'Rejected')"
+                [disabled]="loading"
+              >
+                Reject
+              </button>
+              <span *ngIf="form.status !== 'Pending'">No actions available</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>

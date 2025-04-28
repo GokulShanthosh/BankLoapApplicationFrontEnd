@@ -1,0 +1,121 @@
+/* admin-dashboard.component.css */
+.admin-dashboard {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    margin-bottom: 10px;
+  }
+  
+  .filters {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    gap: 15px;
+  }
+  
+  .search-bar {
+    flex-grow: 1;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .status-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .status-filter select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .loading, .error-message, .no-applications {
+    text-align: center;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    margin: 20px 0;
+  }
+  
+  .error-message {
+    background-color: #ffeeee;
+    color: #d32f2f;
+  }
+  
+  .applications-table {
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .approve-btn, .reject-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .approve-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .reject-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .pending {
+    color: #ff9800;
+    font-weight: 600;
+  }
+  
+  .approved {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+  
+  .rejected {
+    color: #d32f2f;
+    font-weight: 600;
+  }

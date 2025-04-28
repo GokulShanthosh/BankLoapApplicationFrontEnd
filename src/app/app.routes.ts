@@ -1,6 +1,6 @@
-// app.routes.ts
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
+import { adminGuard } from './auth/admin.guard'; // You'll need to create this
 
 export const routes: Routes = [
   {
@@ -46,7 +46,7 @@ export const routes: Routes = [
       import('./admin-dashboard/admin-dashboard.component').then(
         (c) => c.AdminDashboardComponent
       ),
-    canActivate: [authGuard], // Optionally protect this route
+    canActivate: [authGuard, adminGuard], // Added adminGuard
   },
   {
     path: 'user-dashboard',
@@ -54,7 +54,49 @@ export const routes: Routes = [
       import('./user-dashboard/user-dashboard.component').then(
         (c) => c.UserDashboardComponent
       ),
-    canActivate: [authGuard], // Optionally protect this route
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'plans',
+        pathMatch: 'full'
+      },
+      {
+        path: 'plans',
+        loadComponent: () =>
+          import('./loan-plans/loan-plans.component').then(
+            (c) => c.LoanPlansComponent
+          )
+      },
+      {
+        path: 'apply',
+        loadComponent: () =>
+          import('./apply-loan/apply-loan.component').then(
+            (c) => c.ApplyLoanComponent
+          )
+      },
+      {
+        path: 'my-loans',
+        loadComponent: () =>
+          import('./my-loans/my-loans.component').then(
+            (c) => c.MyLoansComponent
+          )
+      },
+      {
+        path: 'loan-selection',
+        loadComponent: () =>
+          import('./loan-selection/loan-selection.component').then(
+            (c) => c.LoanSelectionComponent
+          )
+      },
+      {
+        path: 'loan-application',
+        loadComponent: () =>
+          import('./loan-application-form/loan-application-form.component').then(
+            (c) => c.LoanApplicationFormComponent
+          )
+      }
+    ]
   },
   {
     path: '**',

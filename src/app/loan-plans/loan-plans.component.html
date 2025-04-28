@@ -1,0 +1,11 @@
+<div class="loan-plans">
+    <h2>Available Loan Plans</h2>
+    <div class="plans-container">
+      <div class="plan-card" *ngFor="let plan of loanPlans">
+        <h3>{{plan.type}}</h3>
+        <p><strong>Interest Rate:</strong> {{plan.interestRate}}</p>
+        <p><strong>Max Amount:</strong> {{plan.maxAmount}}</p>
+        <p><strong>Tenure:</strong> {{plan.tenure}}</p>
+      </div>
+    </div>
+  </div>

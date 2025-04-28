@@ -29,10 +29,25 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
+      // Check for token expiration
+      const isTokenExpired = 
+        error.status === 401 || 
+        error.error?.message === 'jwt expired' || 
+        (error.error?.stack && error.error.stack.includes('TokenExpiredError'));
+      
+      if (isTokenExpired) {
+        console.log('Token expired, logging out user');
         authService.logout();
-        router.navigate(['/login']);
+        
+        // Redirect to login with return URL for better UX
+        router.navigate(['/login'], { 
+          queryParams: { 
+            returnUrl: router.url,
+            expired: 'true'
+          }
+        });
       }
+      
       return throwError(() => error);
     })
   );
