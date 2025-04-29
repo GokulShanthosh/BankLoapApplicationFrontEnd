@@ -5,7 +5,8 @@ import { Component } from '@angular/core';
   selector: 'app-loan-plans',
   templateUrl: './loan-plans.component.html',
   styleUrls: ['./loan-plans.component.css'],
-  imports: [CommonModule]
+  imports: [CommonModule],
+  standalone: true
 })
 export class LoanPlansComponent {
   loanPlans = [

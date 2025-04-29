@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
-import { adminGuard } from './auth/admin.guard'; // You'll need to create this
+import { adminGuard } from './auth/admin.guard';
 
 export const routes: Routes = [
   {
@@ -46,54 +46,47 @@ export const routes: Routes = [
       import('./admin-dashboard/admin-dashboard.component').then(
         (c) => c.AdminDashboardComponent
       ),
-    canActivate: [authGuard, adminGuard], // Added adminGuard
+    canActivate: [authGuard, adminGuard],
   },
   {
     path: 'user-dashboard',
-    loadComponent: () =>
+    loadComponent: () => 
       import('./user-dashboard/user-dashboard.component').then(
-        (c) => c.UserDashboardComponent
+        c => c.UserDashboardComponent
       ),
     canActivate: [authGuard],
     children: [
-      {
-        path: '',
-        redirectTo: 'plans',
-        pathMatch: 'full'
+      { 
+        path: '', 
+        redirectTo: 'plans', 
+        pathMatch: 'full' 
       },
       {
         path: 'plans',
-        loadComponent: () =>
+        loadComponent: () => 
           import('./loan-plans/loan-plans.component').then(
-            (c) => c.LoanPlansComponent
+            c => c.LoanPlansComponent
           )
       },
       {
         path: 'apply',
-        loadComponent: () =>
+        loadComponent: () => 
           import('./apply-loan/apply-loan.component').then(
-            (c) => c.ApplyLoanComponent
+            c => c.ApplyLoanComponent
           )
       },
       {
         path: 'my-loans',
-        loadComponent: () =>
+        loadComponent: () => 
           import('./my-loans/my-loans.component').then(
-            (c) => c.MyLoansComponent
+            c => c.MyLoansComponent
           )
       },
       {
         path: 'loan-selection',
-        loadComponent: () =>
+        loadComponent: () => 
           import('./loan-selection/loan-selection.component').then(
-            (c) => c.LoanSelectionComponent
-          )
-      },
-      {
-        path: 'loan-application',
-        loadComponent: () =>
-          import('./loan-application-form/loan-application-form.component').then(
-            (c) => c.LoanApplicationFormComponent
+            c => c.LoanSelectionComponent
           )
       }
     ]

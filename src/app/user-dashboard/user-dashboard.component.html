@@ -1,19 +1,27 @@
 <div class="user-dashboard">
-    <nav class="dashboard-nav">
-      <button (click)="activeTab = 'plans'" [class.active]="activeTab === 'plans'">
-        View Loan Plans
-      </button>
-      <button (click)="activeTab = 'apply'" [class.active]="activeTab === 'apply'">
-        Apply for Loan
-      </button>
-      <button (click)="activeTab = 'myLoans'" [class.active]="activeTab === 'myLoans'">
-        My Loans
-      </button>
-    </nav>
-  
-    <div class="dashboard-content">
-      <app-loan-plans *ngIf="activeTab === 'plans'"></app-loan-plans>
-      <app-apply-loan *ngIf="activeTab === 'apply'"></app-apply-loan>
-      <app-my-loans *ngIf="activeTab === 'myLoans'"></app-my-loans>
-    </div>
+  <nav class="dashboard-nav">
+    <!-- Use routerLink for navigation -->
+    <button
+      [routerLink]="['plans']"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }">
+      View Loan Plans
+    </button>
+   
+    <button
+      [routerLink]="['apply']"
+      routerLinkActive="active">
+      Apply for Loan
+    </button>
+   
+    <button
+      [routerLink]="['my-loans']"
+      routerLinkActive="active">
+      My Loans
+    </button>
+  </nav>
+  <div class="dashboard-content">
+    <!-- This will render the current child component -->
+    <router-outlet></router-outlet>
   </div>
+</div>

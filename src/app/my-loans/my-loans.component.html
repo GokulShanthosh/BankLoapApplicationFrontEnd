@@ -1,42 +1,42 @@
 <div class="my-loans">
-    <h2>My Loan Applications</h2>
-    
-    <div *ngIf="isLoading" class="loading">Loading your loans...</div>
-    
-    <div *ngIf="errorMessage" class="error-message">
-      {{errorMessage}}
-      <button (click)="fetchMyLoans()">Try Again</button>
-    </div>
-    
-    <div *ngIf="loans.length === 0 && !isLoading" class="no-loans">
-      You don't have any loan applications yet.
-    </div>
-    
-    <table *ngIf="loans.length > 0">
-      <thead>
-        <tr>
-          <th>Application ID</th>
-          <th>Loan Type</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let loan of loans">
-          <td>{{loan.applicationId}}</td>
-          <td>{{loan.loanType}}</td>
-          <td>{{loan.loanAmount | currency:'INR'}}</td>
-          <td [class]="loan.status.toLowerCase()">{{loan.status}}</td>
-          <td>
-            <button *ngIf="loan.status === 'Pending'" 
-                    (click)="withdrawApplication(loan.applicationId)"
-                    class="withdraw-btn">
-              Withdraw
-            </button>
-            <span *ngIf="loan.status !== 'Pending'">No actions available</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <h2>My Loan Applications</h2>
+  
+  <div *ngIf="isLoading" class="loading">Loading your loans...</div>
+  
+  <div *ngIf="errorMessage" class="error-message">
+    {{errorMessage}}
+    <button (click)="fetchMyLoans()">Try Again</button>
   </div>
+  
+  <div *ngIf="loans.length === 0 && !isLoading" class="no-loans">
+    You don't have any loan applications yet.
+  </div>
+  
+  <table *ngIf="loans.length > 0">
+    <thead>
+      <tr>
+        <th>Application ID</th>
+        <th>Loan Type</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let loan of loans">
+        <td>{{loan.applicationId}}</td>
+        <td>{{loan.loanType}}</td>
+        <td>{{loan.loanAmount | currency:'INR'}}</td>
+        <td [class]="loan.status.toLowerCase()">{{loan.status}}</td>
+        <td>
+          <button *ngIf="loan.status === 'Pending'" 
+                  (click)="withdrawApplication(loan.applicationId)"
+                  class="withdraw-btn">
+            Withdraw
+          </button>
+          <span *ngIf="loan.status !== 'Pending'">No actions available</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
