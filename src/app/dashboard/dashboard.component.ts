@@ -107,7 +107,17 @@ export class DashboardComponent {
     { icon: 'rocket_launch', title: 'Instant Approval', text: 'Get loan approval within 24 hours' },
     { icon: 'currency_exchange', title: 'Low Interest Rates', text: 'Starting from 7.5% interest rates' },
     { icon: 'shield', title: 'Secure Process', text: '100% secure application process' },
-    { icon: 'support_agent', title: '24/7 Support', text: 'Dedicated customer support team' }
+    { icon: 'support_agent', title: '24/7 Support', text: 'Dedicated customer support team' },
+    { 
+      icon: 'payments', 
+      title: 'Flexible Repayment', 
+      text: 'Customizable repayment schedules' 
+    },
+    { 
+      icon: 'cloud', 
+      title: 'Online Management', 
+      text: 'Manage your loan completely online' 
+    }
   ];
 
   loanPlans = [

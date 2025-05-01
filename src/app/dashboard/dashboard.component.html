@@ -1,34 +1,39 @@
-<!-- dashboard.component.html -->
-<button *ngIf="showScrollButton" class="scroll-top" (click)="scrollToTop()">
+<button *ngIf="showScrollButton" class="scroll-top" (click)="scrollToTop()" [@fadeIn]>
     <mat-icon>arrow_upward</mat-icon>
   </button>
   
   <header class="header" [@fadeIn]>
     <nav class="navbar">
       <div class="brand">
-        <img src="blms-logo.jpg" alt="BLMS Logo" class="logo">
+        <img src="blms-logo.jpg" alt="BLMS Logo" class="logo" loading="lazy">
         <span class="brand-name">BLMS</span>
       </div>
       
       <div class="nav-items">
-        <a routerLink="/" class="nav-link">Home</a>
-        <a routerLink="/loan-plans" class="nav-link">Loan Plans</a>
-        <a routerLink="/about" class="nav-link">About</a>
+        <a routerLink="/" class="nav-link" routerLinkActive="active">Home</a>
+        <a routerLink="/loan-plans" class="nav-link" routerLinkActive="active">Loan Plans</a>
+        <a routerLink="/about" class="nav-link" routerLinkActive="active">About</a>
         
         <div class="auth-buttons" *ngIf="!isLoggedIn">
-          <button mat-raised-button color="primary" routerLink="/login" class="me-2">Login</button>
-          <button mat-stroked-button color="primary" routerLink="/signup">Sign Up</button>
+          <button mat-raised-button color="primary" routerLink="/login" class="me-2" [@slideIn]>Login</button>
+          <button mat-stroked-button color="primary" routerLink="/signup" [@slideIn]>Sign Up</button>
         </div>
   
-        <div class="user-menu" *ngIf="isLoggedIn">
-          <button mat-button [matMenuTriggerFor]="menu">
+        <div class="user-menu" *ngIf="isLoggedIn" [@slideIn]>
+          <button mat-button [matMenuTriggerFor]="menu" aria-label="User menu">
             <mat-icon>account_circle</mat-icon>
             {{ currentUser?.name }}
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item routerLink="/user-dashboard">Dashboard</button>
-            <button mat-menu-item routerLink="/my-loans">My Loans</button>
-            <button mat-menu-item (click)="clickLogout()">Logout</button>
+            <button mat-menu-item routerLink="/user-dashboard">
+              <mat-icon>dashboard</mat-icon> Dashboard
+            </button>
+            <button mat-menu-item routerLink="/my-loans">
+              <mat-icon>request_quote</mat-icon> My Loans
+            </button>
+            <button mat-menu-item (click)="clickLogout()">
+              <mat-icon>logout</mat-icon> Logout
+            </button>
           </mat-menu>
         </div>
       </div>
@@ -40,51 +45,53 @@
     <div class="hero-content">
       <h1 class="hero-title">Your Dream Loan, Simplified</h1>
       <p class="hero-subtitle">Get instant approval for home, personal, and vehicle loans</p>
-      <button mat-raised-button color="accent" class="cta-button" (click)="applyNow()"
-              [@pulse]="hoverState">
-        Apply Now
+      <button mat-raised-button color="accent" class="cta-button" 
+              (click)="applyNow()" [@pulse]="hoverState">
+        Apply Now <mat-icon>arrow_forward</mat-icon>
       </button>
     </div>
   </section>
   
-  
   <section class="specialties" [@listAnimation]>
     <h2 class="section-title">Why Choose Us?</h2>
     <div class="specialty-cards">
-      <mat-card class="specialty-card" *ngFor="let specialty of specialties">
-        <mat-icon class="specialty-icon">{{ specialty.icon }}</mat-icon>
-        <h3>{{ specialty.title }}</h3>
-        <p>{{ specialty.text }}</p>
-      </mat-card>
+        <mat-card class="specialty-card" *ngFor="let specialty of specialties" [@staggerSlide]>
+            <div class="icon-wrapper">
+              <mat-icon class="specialty-icon">{{ specialty.icon }}</mat-icon>
+            </div>
+            <h3>{{ specialty.title }}</h3>
+            <p>{{ specialty.text }}</p>
+          </mat-card>
     </div>
   </section>
   
   <section class="loan-calculator" [@slideIn]>
     <mat-card class="calculator-card">
-      <h2 class="section-title">Calculate Your EMI</h2>
+      <h2 class="section-title pt-3">Calculate Your EMI</h2>
       <div class="calculator-controls" [@staggerSlide]>
         <div class="input-group">
-          <label>Loan Amount</label>
-          <input type="range" min="100000" max="10000000" step="50000" 
+          <label for="loanAmount">Loan Amount</label>
+          <input type="range" id="loanAmount" min="100000" max="10000000" step="50000" 
                  [(ngModel)]="loanAmount" (input)="calculateEMI()">
           <span>₹ {{ loanAmount | number }}</span>
         </div>
         
         <div class="input-group">
-          <label>Tenure (years)</label>
-          <input type="range" min="1" max="30" [(ngModel)]="tenure" (input)="calculateEMI()">
+          <label for="tenure">Tenure (years)</label>
+          <input type="range" id="tenure" min="1" max="30" 
+                 [(ngModel)]="tenure" (input)="calculateEMI()">
           <span>{{ tenure }} Years</span>
         </div>
   
         <div class="input-group">
-          <label>Interest Rate</label>
-          <input type="range" min="5" max="20" step="0.1" 
+          <label for="interestRate">Interest Rate</label>
+          <input type="range" id="interestRate" min="5" max="20" step="0.1" 
                  [(ngModel)]="interestRate" (input)="calculateEMI()">
           <span>{{ interestRate }}%</span>
         </div>
       </div>
   
-      <div class="emi-result">
+      <div class="emi-result" [@fadeIn]>
         <div class="emi-amount">
           <span class="label">Monthly EMI:</span>
           <span class="value">₹ {{ emi | number:'1.0-0' }}</span>
@@ -111,8 +118,7 @@
     <h2 class="section-title">Popular Loan Plans</h2>
     <div class="plan-cards">
       <mat-card class="plan-card" *ngFor="let plan of loanPlans" 
-                (click)="viewPlanDetails(plan.type)"
-                [@cardHover]>
+                (click)="viewPlanDetails(plan.type)" [@cardHover]>
         <mat-card-header>
           <mat-card-title>{{ plan.type }}</mat-card-title>
           <mat-card-subtitle>Interest: {{ plan.interest }}</mat-card-subtitle>
@@ -121,7 +127,9 @@
           <ul>
             <li *ngFor="let feature of plan.features">{{ feature }}</li>
           </ul>
-          <div class="emi-example">{{ plan.emi }}</div>
+          <div class="emi-example">
+            <mat-icon>currency_rupee</mat-icon>{{ plan.emi }}
+          </div>
         </mat-card-content>
       </mat-card>
     </div>
@@ -130,7 +138,7 @@
   <section class="testimonials" [@fadeIn]>
     <h2 class="section-title">Customer Experiences</h2>
     <div class="testimonial-cards">
-      <mat-card *ngFor="let testimonial of testimonials" class="testimonial-card">
+      <mat-card *ngFor="let testimonial of testimonials" class="testimonial-card" [@staggerSlide]>
         <mat-card-content>
           <div class="rating">
             <mat-icon *ngFor="let star of getStars(testimonial.rating)">star</mat-icon>
@@ -147,16 +155,16 @@
       <div class="footer-section">
         <h4>BLMS Services</h4>
         <ul>
-          <li>Personal Loans</li>
-          <li>Home Loans</li>
-          <li>Business Loans</li>
-          <li>Loan Calculator</li>
+          <li><mat-icon>chevron_right</mat-icon> Personal Loans</li>
+          <li><mat-icon>chevron_right</mat-icon> Home Loans</li>
+          <li><mat-icon>chevron_right</mat-icon> Vehicle Loans</li>
+          <li><mat-icon>chevron_right</mat-icon> Loan Calculator</li>
         </ul>
       </div>
       <div class="footer-section">
         <h4>Contact Us</h4>
-        <p>Email: support&#64;blms.com</p>
-        <p>Phone: 1800-123-4567</p>
+        <p><mat-icon>mail</mat-icon> support&#64;blms.com</p>
+        <p><mat-icon>phone</mat-icon> 1800-123-4567</p>
       </div>
     </div>
     <div class="footer-bottom">
