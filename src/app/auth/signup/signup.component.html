@@ -1,87 +1,77 @@
-<form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label for="name">Name:</label>
-    <input type="text" id="name" formControlName="name" />
-    <div
-      *ngIf="
-        signupForm.controls['name'].invalid &&
-        (signupForm.controls['name'].dirty ||
-          signupForm.controls['name'].touched)
-      "
-    >
-      <div *ngIf="signupForm.controls['name'].errors?.['required']">
-        Name is required.
-      </div>
-      <div *ngIf="signupForm.controls['name'].errors?.['minlength']">
-        Name must be at least 3 characters long.
-      </div>
-    </div>
+<div class="signup-container" [@fadeIn]>
+  <div class="ocean-waves">
+    <div class="wave wave1"></div>
+    <div class="wave wave2"></div>
+    <div class="wave wave3"></div>
+    <div class="wave wave4"></div>
   </div>
-
-  <div>
-    <label for="email">Email:</label>
-    <input type="email" id="email" formControlName="email" />
-    <div
-      *ngIf="
-        signupForm.controls['email'].invalid &&
-        (signupForm.controls['email'].dirty ||
-          signupForm.controls['email'].touched)
-      "
-    >
-      <div *ngIf="signupForm.controls['email'].errors?.['required']">
-        Email is required.
+  <div class="form-wrapper" [@shake]="shakeState">
+    <mat-card class="signup-card" [@formElements]>
+      <mat-card-header>
+        <div class="logo-container">
+          <div class="logo-circle">
+            <mat-icon class="logo-icon">person_add</mat-icon>
+          </div>
+        </div>
+        <mat-card-title>Create Account</mat-card-title>
+        <mat-card-subtitle>Join us and get started today</mat-card-subtitle>
+      </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Full Name</mat-label>
+        <input matInput type="text" formControlName="name" placeholder="John Doe">
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="signupForm.get('name')?.invalid">{{ getNameErrorMessage() }}</mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="your.email@example.com">
+        <mat-icon matPrefix>email</mat-icon>
+        <mat-error *ngIf="signupForm.get('email')?.invalid">{{ getEmailErrorMessage() }}</mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" type="button">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="signupForm.get('password')?.invalid">{{ getPasswordErrorMessage() }}</mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword">
+        <mat-icon matPrefix>lock_outline</mat-icon>
+        <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" [attr.aria-label]="'Hide confirm password'" type="button">
+          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="signupForm.get('confirmPassword')?.invalid">{{ getConfirmPasswordErrorMessage() }}</mat-error>
+      </mat-form-field>
+      
+      <mat-checkbox color="primary" class="terms-checkbox">I agree to the Terms & Conditions</mat-checkbox>
+      
+      <button mat-raised-button color="primary" type="submit" class="signup-button" [disabled]="isSubmitting">
+        <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+        <span *ngIf="!isSubmitting">CREATE ACCOUNT</span>
+      </button>
+      
+      <div class="error-container" *ngIf="errorMessage">
+        <mat-error class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </mat-error>
       </div>
-      <div *ngIf="signupForm.controls['email'].errors?.['email']">
-        Enter a valid email.
-      </div>
-    </div>
+    </form>
+  </mat-card-content>
+  
+  <mat-card-actions class="login-container">
+    <span>Already have an account?</span>
+    <a routerLink="/login" class="login-link">Log In</a>
+  </mat-card-actions>
+</mat-card>
   </div>
-
-  <div>
-    <label for="password">Password:</label>
-    <input type="password" id="password" formControlName="password" />
-    <div
-      *ngIf="
-        signupForm.controls['password'].invalid &&
-        (signupForm.controls['password'].dirty ||
-          signupForm.controls['password'].touched)
-      "
-    >
-      <div *ngIf="signupForm.controls['password'].errors?.['required']">
-        Password is required.
-      </div>
-      <div *ngIf="signupForm.controls['password'].errors?.['minlength']">
-        Password must be at least 6 characters long.
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <label for="confirmPassword">Confirm Password:</label>
-    <input
-      type="password"
-      id="confirmPassword"
-      formControlName="confirmPassword"
-    />
-    <div
-      *ngIf="
-        signupForm.controls['confirmPassword'].invalid &&
-        (signupForm.controls['confirmPassword'].dirty ||
-          signupForm.controls['confirmPassword'].touched)
-      "
-    >
-      <div *ngIf="signupForm.controls['confirmPassword'].errors?.['required']">
-        Confirm Password is required.
-      </div>
-      <div
-        *ngIf="signupForm.controls['confirmPassword'].errors?.['passwordMismatch']"
-      >
-        Passwords do not match.
-      </div>
-    </div>
-  </div>
-
-  <button type="submit" [disabled]="isSubmitting">Sign Up</button>
-  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-  <p>Already have an account? <a routerLink="/login">Log In</a></p>
-</form>
+</div>

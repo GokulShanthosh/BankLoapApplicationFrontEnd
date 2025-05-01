@@ -1,52 +1,65 @@
-<div class="container">
-  <div class="form-container login-form">
-    <h2>Login</h2>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" formControlName="email" required />
-        <div
-          *ngIf="
-            loginForm.get('email')?.invalid &&
-            (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)
-          "
-          class="error-message"
-        >
-          Email is required and must be a valid email address.
+<div class="login-container" [@fadeIn]>
+  <div class="ocean-waves">
+    <div class="wave wave1"></div>
+    <div class="wave wave2"></div>
+    <div class="wave wave3"></div>
+    <div class="wave wave4"></div>
+  </div>
+  
+  <div class="form-wrapper" [@shake]="shakeState">
+    <mat-card class="login-card" [@formElements]>
+      <mat-card-header>
+        <div class="logo-container">
+          <div class="logo-circle">
+            <mat-icon class="logo-icon">lock</mat-icon>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          formControlName="password"
-          required
-        />
-        <div
-          *ngIf="
-            loginForm.get('password')?.invalid &&
-            (loginForm.get('password')?.dirty ||
-              loginForm.get('password')?.touched)
-          "
-          class="error-message"
-        >
-          Password is required and must be at least 6 characters long.
-        </div>
-      </div>
-      <button type="submit" [disabled]="isSubmitting">
-        <span *ngIf="isSubmitting">Loading...</span>
-        <span *ngIf="!isSubmitting">Login</span>
-      </button>
-      <p *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </p>
-      <div class="forgot-password-link">
-        <a routerLink="/forgot-password">Forgot Password?</a>
-      </div>
-      <div class="signup-link">
-        <p>Don't have an account? <a routerLink="/signup">Sign Up</a></p>
-      </div>
-    </form>
+        <mat-card-title>Welcome Back</mat-card-title>
+        <mat-card-subtitle>Please sign in to your account</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="your.email@example.com">
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.invalid">{{ getEmailErrorMessage() }}</mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+            <mat-icon matPrefix>lock</mat-icon>
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" type="button">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.invalid">{{ getPasswordErrorMessage() }}</mat-error>
+          </mat-form-field>
+          
+          <div class="actions-row">
+            <mat-checkbox color="primary" class="remember-me">Remember me</mat-checkbox>
+            <a routerLink="/forgot-password" class="forgot-link">Forgot Password?</a>
+          </div>
+          
+          <button mat-raised-button color="primary" type="submit" class="login-button" [disabled]="isSubmitting">
+            <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+            <span *ngIf="!isSubmitting">LOGIN</span>
+          </button>
+          
+          <div class="error-container" *ngIf="errorMessage">
+            <mat-error class="error-message">
+              <mat-icon>error_outline</mat-icon>
+              {{ errorMessage }}
+            </mat-error>
+          </div>
+        </form>
+      </mat-card-content>
+      
+      <mat-card-actions class="signup-container">
+        <span>Don't have an account?</span>
+        <a routerLink="/signup" class="signup-link">Sign Up</a>
+      </mat-card-actions>
+    </mat-card>
   </div>
 </div>
