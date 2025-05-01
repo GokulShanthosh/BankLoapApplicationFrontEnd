@@ -1,1 +1,122 @@
-<p>loan-review works!</p>
+<!-- loan-review/loan-review.component.html -->
+<div class="review-container" *ngIf="formData">
+    <h2 class="text-center">Review Your {{loanType | titlecase}} Loan Application</h2>
+    
+    <div class="review-section">
+      <h3>Personal Details</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Name:</strong> {{formData.personalDetails.applicantName}}</p>
+          <p><strong>Date of Birth:</strong> {{formData.personalDetails.dob | date}}</p>
+          <p><strong>Gender:</strong> {{formData.personalDetails.gender | titlecase}}</p>
+          <p><strong>Nationality:</strong> {{formData.personalDetails.nationality}}</p>
+          <p><strong>Aadhar Number:</strong> {{formData.personalDetails.aadharNumber}}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>PAN Number:</strong> {{formData.personalDetails.panNumber}}</p>
+          <p><strong>Email:</strong> {{formData.personalDetails.emailId}}</p>
+          <p><strong>Phone:</strong> {{formData.personalDetails.phoneNumber}}</p>
+          <p><strong>Employment Type:</strong> {{formData.personalDetails.employmentType | titlecase}}</p>
+          <p><strong>Monthly Income:</strong> ₹{{formData.personalDetails.income | number}}</p>
+        </div>
+      </div>
+      
+      <div class="address-section">
+        <h4>Address Information</h4>
+        <p><strong>Residential Address:</strong> {{formData.personalDetails.residentialAddress}}</p>
+        <p><strong>Permanent Address:</strong> {{formData.personalDetails.permanentAddress}}</p>
+      </div>
+      
+      <div class="employment-section" *ngIf="formData.personalDetails.employmentType === 'salaried'">
+        <h4>Employment Details</h4>
+        <p><strong>Company Name:</strong> {{formData.personalDetails.companyName}}</p>
+      </div>
+      
+      <div class="employment-section" *ngIf="formData.personalDetails.employmentType === 'self_employed'">
+        <h4>Self Employment Details</h4>
+        <p><strong>Type of Self Employment:</strong> {{formData.personalDetails.selfEmploymentType}}</p>
+      </div>
+      
+      <div class="employment-section" *ngIf="formData.personalDetails.employmentType === 'business'">
+        <h4>Business Details</h4>
+        <p><strong>Business Type:</strong> {{formData.personalDetails.businessType}}</p>
+      </div>
+    </div>
+    
+    <div class="review-section">
+      <h3>Bank Details</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Bank Name:</strong> {{formData.bankDetails.bankName}}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Account Number:</strong> {{formData.bankDetails.accountNumber}}</p>
+          <p><strong>IFSC Code:</strong> {{formData.bankDetails.ifscCode}}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="review-section">
+      <h3>Loan Details</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Loan Type:</strong> {{formData.loanDetails.loanType | titlecase}} Loan</p>
+          <p><strong>Loan Amount:</strong> ₹{{formData.loanDetails.loanAmount | number}}</p>
+          <p><strong>Loan Tenure:</strong> {{formData.loanDetails.loanTenure}} years</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Purpose of Loan:</strong> {{formData.loanDetails.loanPurpose | titlecase}}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="loan-calculations">
+      <h3>Loan Calculation Summary</h3>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="calculation-item">
+            <p class="calc-label">Interest Rate</p>
+            <p class="calc-value">{{interestRate}}%</p>
+          </div>
+          <div class="calculation-item">
+            <p class="calc-label">Processing Fee (1%)</p>
+            <p class="calc-value">₹{{processingFee | number: '1.2-2'}}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="calculation-item highlight">
+            <p class="calc-label">Monthly EMI</p>
+            <p class="calc-value">₹{{emi | number}}</p>
+          </div>
+          <div class="calculation-item">
+            <p class="calc-label">Total Amount Payable</p>
+            <p class="calc-value">₹{{totalAmount | number}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="terms-conditions">
+      <h3>Terms & Conditions</h3>
+      <div class="terms-content">
+        <p>By submitting this application, I confirm that:</p>
+        <ul>
+          <li>All information provided is true and correct to the best of my knowledge.</li>
+          <li>I authorize the bank to verify the information provided.</li>
+          <li>I understand that the interest rate is subject to change as per bank policies.</li>
+          <li>I agree to pay the EMI on time as agreed upon approval of the loan.</li>
+          <li>I understand that the final approval is subject to eligibility criteria and documentation.</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="btn btn-secondary" (click)="editApplication()">Edit Application</button>
+      <button class="btn btn-primary" (click)="submitApplication()">Submit Application</button>
+    </div>
+  </div>
+  
+  <div class="no-data-found" *ngIf="!formData">
+    <p>No application data found. Please fill out the loan application form first.</p>
+    <button class="btn btn-primary" [routerLink]="['/user-dashboard/apply-form']">Go to Application Form</button>
+  </div>

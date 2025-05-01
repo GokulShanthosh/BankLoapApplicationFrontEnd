@@ -1,13 +1,13 @@
 // loan.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators'; 
 import { throwError } from 'rxjs';
 
 export interface LoanForm {
   applicantName: string;
-  applicationId?: string;
+  applicationId: string;
   dob: Date;
   nationality: string;
   aadharNumber: string;
@@ -50,12 +50,27 @@ export interface WithdrawRequest {
   providedIn: 'root',
 })
 export class LoanService {
-  private apiUrl = 'http://localhost:3000/api/v1/applications'; // Update with your backend URL for forms
+  private apiUrl = 'http://127.0.0.1:3000/api/v1/applications'; // Update with your backend URL for forms
   private http = inject(HttpClient);
+
+  private loanApplicationDataSubject = new BehaviorSubject<any>(null);
+  public loanApplicationData$ = this.loanApplicationDataSubject.asObservable();
 
   // Create a new loan application form
   createLoanApplication(formData: LoanForm): Observable<LoanResponse> {
-    return this.http.post<LoanResponse>(this.apiUrl, formData);
+    return this.http.post<LoanResponse>(`${this.apiUrl}/`, formData);
+  }
+
+  setLoanApplicationData(data: any): void {
+    this.loanApplicationDataSubject.next(data);
+  }
+
+  // clearLoanApplicationData(): void {
+  //   this.applicationData = null;
+  // }
+
+  getLoanApplicationData(): any {
+    return this.loanApplicationDataSubject.getValue();
   }
 
   // Get all forms (admin only)
@@ -112,5 +127,18 @@ export class LoanService {
   // Get a specific form by applicationId
   getFormByApplicationId(applicationId: string): Observable<LoanResponse> {
     return this.http.get<LoanResponse>(`${this.apiUrl}?applicationId=${applicationId}`);
+  }
+
+  calculateEmi(principal: number, rate: number, tenure: number): number {
+    // Monthly interest rate
+    const monthlyRate = rate / (12 * 100);
+    // Total months
+    const totalMonths = tenure * 12;
+    
+    // EMI formula: P * r * (1+r)^n / ((1+r)^n - 1)
+    const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths) / 
+                (Math.pow(1 + monthlyRate, totalMonths) - 1);
+                
+    return Math.round(emi);
   }
 }

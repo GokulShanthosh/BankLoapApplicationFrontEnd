@@ -1,1 +1,454 @@
-<p>loan-application-form works!</p>
+<div class="loan-form-container">
+    <div class="progress-bar-container">
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar-vertical">
+          <div class="progress-bar-fill" [style.height]="(currentStep / 3) * 100 + '%'"></div>
+        </div>
+        <div class="progress-labels-vertical">
+          <div [class.active]="currentStep === 1">Personal Details</div>
+          <div [class.active]="currentStep === 2">Bank Details</div>
+          <div [class.active]="currentStep === 3">Loan Details</div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="main-form-content">
+      <h2 class="text-center">{{loanTitle}}</h2>
+      
+      <ng-container *ngIf="currentStep === 1">
+        <!-- Personal Details Form -->
+        <!-- Include all personal details fields from your example -->
+        <!-- Make sure to add proper error messages for each field -->
+        <form [formGroup]="personalDetails">
+            <h4 class="form-section-title">Personal Details</h4>
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input    
+                type="text"
+                class="form-control"
+                formControlName="applicantName"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('applicantName')?.invalid &&
+                  personalDetails.get('applicantName')?.touched
+                "
+                class="text-danger"
+              >
+                Full Name is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Date of Birth</label>
+              <input type="date" class="form-control" formControlName="dob" />
+              <div
+                *ngIf="
+                  personalDetails.get('dob')?.invalid &&
+                  personalDetails.get('dob')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="personalDetails.get('dob')?.errors?.['required']"
+                  >Date of Birth is required.</span
+                >
+                <span *ngIf="personalDetails.get('dob')?.errors?.['age']"
+                  >Age must be between 20 and 65 years.</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Gender</label>
+              <select class="form-select" formControlName="gender">
+                <option value="" disabled selected>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+              <div
+                *ngIf="
+                  personalDetails.get('gender')?.invalid &&
+                  personalDetails.get('gender')?.touched
+                "
+                class="text-danger"
+              >
+                Gender is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nationality</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="nationality"
+                value="India"
+                readonly
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Aadhar Number</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="aadharNumber"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('aadharNumber')?.invalid &&
+                  personalDetails.get('aadharNumber')?.touched
+                "
+                class="text-danger"
+              >
+                <span
+                  *ngIf="personalDetails.get('aadharNumber')?.errors?.['required']"
+                  >Aadhar Number is required.</span
+                >
+                <span
+                  *ngIf="personalDetails.get('aadharNumber')?.errors?.['pattern']"
+                  >Aadhar Number must be a 12-digit number.</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">PAN Number</label>
+              <input type="text" class="form-control" formControlName="panNumber" />
+              <div
+                *ngIf="
+                  personalDetails.get('panNumber')?.invalid &&
+                  personalDetails.get('panNumber')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="personalDetails.get('panNumber')?.errors?.['required']"
+                  >PAN Number is required.</span
+                >
+                <span *ngIf="personalDetails.get('panNumber')?.errors?.['pattern']"
+                  >Enter a valid PAN number (e.g., ABCDE1234F).</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email ID</label>
+              <input type="email" class="form-control" formControlName="emailId" />
+              <div
+                *ngIf="
+                  personalDetails.get('emailId')?.invalid &&
+                  personalDetails.get('emailId')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="personalDetails.get('emailId')?.errors?.['required']"
+                  >Email ID is required.</span
+                >
+                <span *ngIf="personalDetails.get('emailId')?.errors?.['email']"
+                  >Enter a valid email ID.</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phone Number</label>
+              <input
+                type="tel"
+                class="form-control"
+                formControlName="phoneNumber"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('phoneNumber')?.invalid &&
+                  personalDetails.get('phoneNumber')?.touched
+                "
+                class="text-danger"
+              >
+                <span
+                  *ngIf="personalDetails.get('phoneNumber')?.errors?.['required']"
+                  >Phone Number is required.</span
+                >
+                <span
+                  *ngIf="personalDetails.get('phoneNumber')?.errors?.['pattern']"
+                  >Phone Number must be a 10-digit number.</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Residential Address</label>
+              <textarea
+                class="form-control"
+                formControlName="residentialAddress"
+              ></textarea>
+              <div
+                *ngIf="
+                  personalDetails.get('residentialAddress')?.invalid &&
+                  personalDetails.get('residentialAddress')?.touched
+                "
+                class="text-danger"
+              >
+                Residential Address is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="sameAddress"
+                  (change)="toggleSameAddress($event)"
+                />
+                <label class="form-check-label" for="sameAddress">
+                  Same as Residential Address</label
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Permanent Address</label>
+              <textarea
+                class="form-control"
+                formControlName="permanentAddress"
+              ></textarea>
+              <div
+                *ngIf="
+                  personalDetails.get('permanentAddress')?.invalid &&
+                  personalDetails.get('permanentAddress')?.touched
+                "
+                class="text-danger"
+              >
+                Permanent Address is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Employment Type</label>
+              <select
+                class="form-select"
+                formControlName="employmentType"
+                (change)="changeEmploymentType()"
+              >
+                <option value="" disabled selected>Select employment type</option>
+                <option value="salaried">Salaried</option>
+                <option value="self_employed">Self-Employed</option>
+                <option value="business">Business Owner</option>
+              </select>
+              <div
+                *ngIf="
+                  personalDetails.get('employmentType')?.invalid &&
+                  personalDetails.get('employmentType')?.touched
+                "
+                class="text-danger"
+              >
+                Employment Type is required.
+              </div>
+            </div>
+            <div class="mb-3" *ngIf="showCompany">
+              <label class="form-label">Company Name</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="companyName"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('companyName')?.invalid &&
+                  personalDetails.get('companyName')?.touched
+                "
+                class="text-danger"
+              >
+                Company Name is required.
+              </div>
+            </div>
+            <div class="mb-3" *ngIf="showSelf">
+              <label class="form-label">Self Employment Type</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="selfEmploymentType"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('selfEmploymentType')?.invalid &&
+                  personalDetails.get('selfEmploymentType')?.touched
+                "
+                class="text-danger"
+              >
+                Self Employment Type is required.
+              </div>
+            </div>
+            <div class="mb-3" *ngIf="showBusiness">
+              <label class="form-label">Business Type</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="businessType"
+              />
+              <div
+                *ngIf="
+                  personalDetails.get('businessType')?.invalid &&
+                  personalDetails.get('businessType')?.touched
+                "
+                class="text-danger"
+              >
+                Business Type is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Monthly Income</label>
+              <input type="number" class="form-control" formControlName="income" />
+              <div
+                *ngIf="
+                  personalDetails.get('income')?.invalid &&
+                  personalDetails.get('income')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="personalDetails.get('income')?.errors?.['required']"
+                  >Monthly Income / Annual Returns is required.</span
+                >
+                <span *ngIf="personalDetails.get('income')?.errors?.['min']"
+                  >Monthly Income / Annual Returns must be at least 10000.</span
+                >
+              </div>
+            </div>
+          </form>
+      </ng-container>
+  
+      <ng-container *ngIf="currentStep === 2">
+        <!-- Bank Details Form -->
+        <!-- Include all bank details fields from your example -->
+        <form [formGroup]="bankDetails">
+            <h2 class="text-center text-primary">Personal Loan Application</h2>
+            <h4 class="form-section-title">Bank Details</h4>
+            <div class="mb-3">
+              <label class="form-label"> Bank Name</label>
+              <input type="text" class="form-control" formControlName="bankName" />
+              <div
+                *ngIf="
+                  bankDetails.get('bankName')?.invalid &&
+                  bankDetails.get('bankName')?.touched
+                "
+                class="text-danger"
+              >
+                Bank Name is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Account Number</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="accountNumber"
+              />
+              <div
+                *ngIf="
+                  bankDetails.get('accountNumber')?.invalid &&
+                  bankDetails.get('accountNumber')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="bankDetails.get('accountNumber')?.errors?.['required']"
+                  >Account Number is required.</span
+                >
+                <span
+                  *ngIf="bankDetails.get('accountNumber')?.errors?.['minlength']"
+                  >Account Number must be at least 8 digits.</span
+                >
+                <span *ngIf="bankDetails.get('accountNumber')?.errors?.['pattern']"
+                  >Account Number must contain only numbers.</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">IFSC Number</label>
+              <input type="text" class="form-control" formControlName="ifscCode" />
+              <div
+                *ngIf="
+                  bankDetails.get('ifscCode')?.invalid &&
+                  bankDetails.get('ifscCode')?.touched
+                "
+                class="text-danger"
+              >
+                <span *ngIf="bankDetails.get('ifscCode')?.errors?.['required']"
+                  >IFSC Number is required.</span
+                >
+                <span *ngIf="bankDetails.get('ifscCode')?.errors?.['minlength']"
+                  >IFSC Number must be at least 8 characters.</span
+                >
+                <span *ngIf="bankDetails.get('ifscCode')?.errors?.['pattern']"
+                  >IFSC Number must be alphanumeric.</span
+                >
+              </div>
+            </div>
+          </form>
+      </ng-container>
+  
+      <ng-container *ngIf="currentStep === 3">
+        <!-- Loan Details Form -->
+        <!-- Include all loan details fields from your example -->
+        <form [formGroup]="loanDetails">
+            <h2 class="text-center text-primary">Personal Loan Application</h2>
+            <h4 class="form-section-title">Loan Details</h4>
+            <div class="mb-3">
+              <label class="form-label">Loan Amount</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="loanAmount"
+              />
+              <div
+                *ngIf="
+                  loanDetails.get('loanAmount')?.invalid &&
+                  loanDetails.get('loanAmount')?.touched
+                "
+                class="text-danger"
+              >
+                Loan Amount is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Loan Tenure (Years)</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="loanTenure"
+              />
+              <div
+                *ngIf="
+                  loanDetails.get('loanTenure')?.invalid &&
+                  loanDetails.get('loanTenure')?.touched
+                "
+                class="text-danger"
+              >
+                Loan Tenure is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Purpose of Loan</label>
+              <select class="form-select" formControlName="loanPurpose">
+                <option value="" disabled selected>Select purpose</option>
+                <option value="medical">Medical</option>
+                <option value="education">Education</option>
+                <option value="wedding">Wedding</option>
+                <option value="travel">Travel</option>
+                <option value="debt_consolidation">Debt Consolidation</option>
+              </select>
+              <div
+                *ngIf="
+                  loanDetails.get('loanPurpose')?.invalid &&
+                  loanDetails.get('loanPurpose')?.touched
+                "
+                class="text-danger"
+              >
+                Loan Purpose is required.
+              </div>
+            </div>
+          </form>
+      </ng-container>
+  
+      <div class="form-navigation-buttons">
+        <button class="btn btn-secondary" (click)="previousStep()" [disabled]="currentStep === 1">
+          Previous
+        </button>
+        <button class="btn btn-primary" (click)="nextStep()" *ngIf="currentStep < 3">
+          Next
+        </button>
+        <button class="btn btn-success" (click)="reviewApplication()" *ngIf="currentStep === 3">
+          Review Application
+        </button>
+      </div>
+    </div>
+  </div>

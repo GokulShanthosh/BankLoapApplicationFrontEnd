@@ -38,7 +38,7 @@ export const routes: Routes = [
       import('./dashboard/dashboard.component').then(
         (c) => c.DashboardComponent
       ),
-    canActivate: [authGuard],
+    
   },
   {
     path: 'admin-dashboard',
@@ -69,10 +69,24 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'apply',
+        path: 'apply-form',
         loadComponent: () => 
-          import('./apply-loan/apply-loan.component').then(
-            c => c.ApplyLoanComponent
+          import('./loan-application-form/loan-application-form.component').then(
+            c => c.LoanApplicationFormComponent
+          )
+      },
+      // {
+      //   path: 'apply',
+      //   loadComponent: () => 
+      //     import('./apply-loan/apply-loan.component').then(
+      //       c => c.ApplyLoanComponent
+      //     )
+      // },
+      {
+        path: 'review',
+        loadComponent: () => 
+          import('./loan-review/loan-review.component').then(
+            c => c.LoanReviewComponent
           )
       },
       {
@@ -87,6 +101,13 @@ export const routes: Routes = [
         loadComponent: () => 
           import('./loan-selection/loan-selection.component').then(
             c => c.LoanSelectionComponent
+          )
+      },
+      {
+        path: 'success',
+        loadComponent: () =>
+          import('./success-modal/success-modal.component').then(
+            c => c.SuccessModalComponent
           )
       }
     ]
