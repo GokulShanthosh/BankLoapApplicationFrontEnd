@@ -110,20 +110,20 @@
 }
 
 .logo-circle {
-  width: 70px;
-  height: 70px;
+  width: 75px;
+  height: 75px;
   background: linear-gradient(135deg, #0077b6, #00b4d8);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 13px;
   box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3);
   transform: translateZ(30px);
 }
 
 .logo-icon {
-  font-size: 35px;
+  font-size: 25px;
   color: white;
 }
 
