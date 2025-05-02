@@ -1,27 +1,194 @@
-<div class="user-dashboard">
-  <nav class="dashboard-nav">
-    <!-- Use routerLink for navigation -->
-    <button
-      [routerLink]="['plans']"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }">
-      View Loan Plans
-    </button>
-   
-    <button
-      [routerLink]="['loan-selection']"
-      routerLinkActive="active">
-      Apply for Loan
-    </button>
-   
-    <button
-      [routerLink]="['my-loans']"
-      routerLinkActive="active">
-      My Loans
-    </button>
+<button *ngIf="showScrollButton" class="scroll-top" (click)="scrollToTop()" [@fadeIn]>
+  <mat-icon>arrow_upward</mat-icon>
+</button>
+
+<header class="header" [@fadeIn]>
+  <nav class="navbar">
+    <div class="brand">
+      <img src="blms-logo.jpg" alt="BLMS Logo" class="logo" loading="lazy">
+      <span class="brand-name">BLMS</span>
+    </div>
+    
+    <div class="nav-items">
+      <a routerLink="/" class="nav-link" routerLinkActive="active">Home</a>
+      <a routerLink="/loan-plans" class="nav-link" routerLinkActive="active">Loan Plans</a>
+      <a routerLink="/about" class="nav-link" routerLinkActive="active">About</a>
+      
+      <div class="user-menu" *ngIf="isLoggedIn" [@slideIn]>
+        <button mat-button [matMenuTriggerFor]="menu" aria-label="User menu">
+          <mat-icon>account_circle</mat-icon>
+          {{ currentUser?.name }}
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item routerLink="/user-dashboard">
+            <mat-icon>dashboard</mat-icon> Dashboard
+          </button>
+          <button mat-menu-item routerLink="/my-loans">
+            <mat-icon>request_quote</mat-icon> My Loans
+          </button>
+          <button mat-menu-item (click)="clickLogout()">
+            <mat-icon>logout</mat-icon> Logout
+          </button>
+        </mat-menu>
+      </div>
+    </div>
   </nav>
-  <div class="dashboard-content">
-    <!-- This will render the current child component -->
-    <router-outlet></router-outlet>
+</header>
+
+<!-- User Dashboard Navigation -->
+<section class="dashboard-navigation" [@navAnimation]>
+  <div class="container">
+    <nav class="dashboard-nav">
+      <button 
+        class="dashboard-nav-item" 
+        [routerLink]="['plans']" 
+        routerLinkActive="active"
+        [class.active]="isActive('plans')">
+        <mat-icon>assignment</mat-icon>
+        <span>View Loan Plans</span>
+      </button>
+      
+      <button 
+        class="dashboard-nav-item" 
+        [routerLink]="['loan-selection']" 
+        routerLinkActive="active"
+        [class.active]="isActive('loan-selection')">
+        <mat-icon>add_circle</mat-icon>
+        <span>Apply for Loan</span>
+      </button>
+      
+      <button 
+        class="dashboard-nav-item" 
+        [routerLink]="['my-loans']" 
+        routerLinkActive="active"
+        [class.active]="isActive('my-loans')">
+        <mat-icon>list_alt</mat-icon>
+        <span>My Loans</span>
+      </button>
+    </nav>
   </div>
-</div>
+</section>
+
+<!-- Router outlet for child components -->
+<section class="dashboard-content" [@fadeIn]>
+  <router-outlet></router-outlet>
+</section>
+
+<section class="hero welcome-dashboard" [@slideIn] (mouseenter)="hoverState = 'hover'" (mouseleave)="hoverState = 'normal'">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">Welcome to Your Dashboard</h1>
+    <p class="hero-subtitle">Manage your loans and applications all in one place</p>
+    <button mat-raised-button color="accent" class="cta-button" 
+            (click)="applyNow()" [@pulse]="hoverState">
+      Apply for a New Loan <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </div>
+</section>
+
+<section class="specialties" [@listAnimation]>
+  <h2 class="section-title">Our Services</h2>
+  <div class="specialty-cards">
+      <mat-card class="specialty-card" *ngFor="let specialty of specialties" [@staggerSlide]>
+          <div class="icon-wrapper">
+            <mat-icon class="specialty-icon">{{ specialty.icon }}</mat-icon>
+          </div>
+          <h3>{{ specialty.title }}</h3>
+          <p>{{ specialty.text }}</p>
+        </mat-card>
+  </div>
+</section>
+
+<section class="loan-calculator" [@slideIn]>
+  <mat-card class="calculator-card">
+    <h2 class="section-title pt-3">Calculate Your EMI</h2>
+    <div class="calculator-controls" [@staggerSlide]>
+      <div class="input-group">
+        <label for="loanAmount">Loan Amount</label>
+        <input type="range" id="loanAmount" min="100000" max="10000000" step="50000" 
+               [(ngModel)]="loanAmount" (input)="calculateEMI()">
+        <span>₹ {{ loanAmount | number }}</span>
+      </div>
+      
+      <div class="input-group">
+        <label for="tenure">Tenure (years)</label>
+        <input type="range" id="tenure" min="1" max="30" 
+               [(ngModel)]="tenure" (input)="calculateEMI()">
+        <span>{{ tenure }} Years</span>
+      </div>
+
+      <div class="input-group">
+        <label for="interestRate">Interest Rate</label>
+        <input type="range" id="interestRate" min="5" max="20" step="0.1" 
+               [(ngModel)]="interestRate" (input)="calculateEMI()">
+        <span>{{ interestRate }}%</span>
+      </div>
+    </div>
+
+    <div class="emi-result" [@fadeIn]>
+      <div class="emi-amount">
+        <span class="label">Monthly EMI:</span>
+        <span class="value">₹ {{ emi | number:'1.0-0' }}</span>
+      </div>
+      <div class="breakup">
+        <div class="breakup-item">
+          <span>Principal Amount:</span>
+          <span>₹ {{ loanAmount | number }}</span>
+        </div>
+        <div class="breakup-item">
+          <span>Total Interest:</span>
+          <span>₹ {{ (emi * tenure * 12 - loanAmount) | number }}</span>
+        </div>
+        <div class="breakup-item total">
+          <span>Total Payment:</span>
+          <span>₹ {{ (emi * tenure * 12) | number }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</section>
+
+<section class="loan-plans" [@slideIn]>
+  <h2 class="section-title">Popular Loan Plans</h2>
+  <div class="plan-cards">
+    <mat-card class="plan-card" *ngFor="let plan of loanPlans" 
+              (click)="viewPlanDetails(plan.type)" [@cardHover]>
+      <mat-card-header>
+        <mat-card-title>{{ plan.type }}</mat-card-title>
+        <mat-card-subtitle>Interest: {{ plan.interest }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li *ngFor="let feature of plan.features">{{ feature }}</li>
+        </ul>
+        <div class="emi-example">
+          <mat-icon>currency_rupee</mat-icon>{{ plan.emi }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>
+
+<footer class="footer" [@fadeIn]>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h4>BLMS Services</h4>
+      <ul>
+        <li><mat-icon>chevron_right</mat-icon> Personal Loans</li>
+        <li><mat-icon>chevron_right</mat-icon> Home Loans</li>
+        <li><mat-icon>chevron_right</mat-icon> Vehicle Loans</li>
+        <li><mat-icon>chevron_right</mat-icon> Loan Calculator</li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h4>Contact Us</h4>
+      <p><mat-icon>mail</mat-icon> support&#64;blms.com</p>
+      <p><mat-icon>phone</mat-icon> 1800-123-4567</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 BLMS. All rights reserved.</p>
+  </div>
+</footer>
+
+

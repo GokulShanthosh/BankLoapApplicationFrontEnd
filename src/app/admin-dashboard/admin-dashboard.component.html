@@ -1,86 +1,226 @@
 <!-- admin-dashboard.component.html -->
 <div class="admin-dashboard">
-    <h1>Admin Dashboard</h1>
-    <p>Manage loan applications and approve or reject requests.</p>
-  
-    <div class="filters">
-      <div class="search-bar">
-        <input 
-          type="text" 
-          placeholder="Search by name, ID, phone, or email" 
-          [(ngModel)]="searchTerm"
-        >
+  <!-- Scroll to Top Button -->
+  <button *ngIf="showScrollButton" class="scroll-top" (click)="scrollToTop()" [@fadeIn]>
+    <mat-icon>arrow_upward</mat-icon>
+  </button>
+  <!-- Admin Header -->
+  <header class="admin-header" [@fadeIn]>
+    <div class="admin-navbar">
+      <div class="admin-brand">
+        <h1 class="admin-title">BLMS Admin</h1>
+        <p class="admin-subtitle">Loan Management System</p>
       </div>
-      <div class="status-filter">
-        <label for="status">Filter by Status:</label>
-        <select id="status" [(ngModel)]="statusFilter">
-          <option value="All">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
+      
+      <div class="admin-user-menu" [@slideIn]>
+        <div class="admin-user-info">
+          <div class="admin-user-avatar">
+            <mat-icon>person</mat-icon>
+          </div>
+          <span class="admin-username">{{ currentUser?.name || 'Admin' }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </div>
+        
+        <button mat-raised-button color="warn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
       </div>
     </div>
-  
-    <div *ngIf="loading" class="loading">
-      <p>Loading applications...</p>
+  </header>
+  <div class="container">
+    <!-- Dashboard Statistics -->
+    <div class="dashboard-stats" [@listAnimation]="totalApplications">
+      <div class="stat-card total" 
+           [@cardAnimation]
+           [@pulse]="cardStates['total']"
+           (mouseenter)="setCardState('total', 'hover')"
+           (mouseleave)="setCardState('total', 'normal')">
+        <div class="stat-header">
+          <h3 class="stat-title">Total Applications</h3>
+          <div class="stat-icon total">
+            <mat-icon>library_books</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">{{ totalApplications }}</div>
+        <p class="stat-description">Total loan applications in system</p>
+      </div>
+      <div class="stat-card pending" 
+           [@cardAnimation]
+           [@pulse]="cardStates['pending']"
+           (mouseenter)="setCardState('pending', 'hover')"
+           (mouseleave)="setCardState('pending', 'normal')">
+        <div class="stat-header">
+          <h3 class="stat-title">Pending</h3>
+          <div class="stat-icon pending">
+            <mat-icon>hourglass_empty</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">{{ pendingApplications }}</div>
+        <p class="stat-description">Applications awaiting review</p>
+      </div>
+      <div class="stat-card approved" 
+           [@cardAnimation]
+           [@pulse]="cardStates['approved']"
+           (mouseenter)="setCardState('approved', 'hover')"
+           (mouseleave)="setCardState('approved', 'normal')">
+        <div class="stat-header">
+          <h3 class="stat-title">Approved</h3>
+          <div class="stat-icon approved">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">{{ approvedApplications }}</div>
+        <p class="stat-description">Applications approved</p>
+      </div>
+      <div class="stat-card rejected" 
+           [@cardAnimation]
+           [@pulse]="cardStates['rejected']"
+           (mouseenter)="setCardState('rejected', 'hover')"
+           (mouseleave)="setCardState('rejected', 'normal')">
+        <div class="stat-header">
+          <h3 class="stat-title">Rejected</h3>
+          <div class="stat-icon rejected">
+            <mat-icon>cancel</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">{{ rejectedApplications }}</div>
+        <p class="stat-description">Applications rejected</p>
+      </div>
     </div>
-  
-    <div *ngIf="error" class="error-message">
-      <p>{{ error }}</p>
-      <button (click)="fetchAllForms()">Try Again</button>
+    
+    <!-- Search and Filters -->
+    <div class="control-panel" [@slideIn]>
+      <div class="panel-header">
+        <h2 class="panel-title">Loan Applications</h2>
+        <button class="refresh-button" (click)="fetchAllForms()" 
+                [@buttonAnimation]="hoverState" 
+                (mouseenter)="hoverState = 'hover'" 
+                (mouseleave)="hoverState = 'normal'">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      <div class="filters">
+        <div class="search-bar">
+          <input type="text" 
+                 placeholder="Search by name, ID, email or phone..." 
+                 class="search-input" 
+                 [(ngModel)]="searchTerm">
+        </div>
+        <div class="status-filter">
+          <label for="status">Status:</label>
+          <select id="status" class="filter-select" [(ngModel)]="statusFilter">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
     </div>
-  
-    <div *ngIf="!loading && !error && filteredForms().length === 0" class="no-applications">
-      <p>No loan applications found.</p>
+    
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state" [@fadeIn]>
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading data...</p>
     </div>
-  
-    <div *ngIf="!loading && !error && filteredForms().length > 0" class="applications-table">
-      <table>
+    
+    <!-- Error State -->
+    <div *ngIf="error" class="empty-state" [@fadeIn]>
+      <mat-icon class="empty-icon">error_outline</mat-icon>
+      <h3 class="empty-title">Error Loading Data</h3>
+      <p class="empty-description">{{ error }}</p>
+      <button class="retry-btn" (click)="fetchAllForms()">Try Again</button>
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="!loading && !error && filteredForms().length === 0" class="empty-state" [@fadeIn]>
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <h3 class="empty-title">No Applications Found</h3>
+      <p class="empty-description">No loan applications match your search criteria.</p>
+      <button class="retry-btn" (click)="searchTerm = ''; statusFilter = 'All'">Clear Filters</button>
+    </div>
+    
+    <!-- Applications Table -->
+    <div *ngIf="!loading && !error && filteredForms().length > 0" class="applications-panel" [@fadeIn]>
+      <table class="applications-table">
         <thead>
           <tr>
             <th>Application ID</th>
             <th>Applicant Name</th>
-            <th>Email</th>
-            <th>Phone</th>
+            <th>Contact</th>
             <th>Loan Amount</th>
-            <th>Purpose</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let form of filteredForms()">
-            <td>{{ form.applicationId }}</td>
+          <tr *ngFor="let form of filteredForms()" [@tableRowAnimation]>
+            <td class="application-id">{{ form.applicationId }}</td>
             <td>{{ form.applicantName }}</td>
-            <td>{{ form.emailId }}</td>
-            <td>{{ form.phoneNumber }}</td>
-            <td>{{ form.loanAmount | currency:'INR' }}</td>
-            <td>{{ form.loanPurpose }}</td>
             <td>
-              <span [ngClass]="form.status?.toLowerCase()">{{ form.status }}</span>
+              <div class="email">{{ form.emailId }}</div>
+              <div class="phone">{{ form.phoneNumber }}</div>
             </td>
-            <td class="actions">
-              <button 
-                *ngIf="form.status === 'Pending'"
-                class="approve-btn" 
-                (click)="approveOrRejectLoan(form.applicationId!, 'Approved')"
-                [disabled]="loading"
-              >
-                Approve
-              </button>
-              <button 
-                *ngIf="form.status === 'Pending'"
-                class="reject-btn" 
-                (click)="approveOrRejectLoan(form.applicationId!, 'Rejected')"
-                [disabled]="loading"
-              >
-                Reject
-              </button>
-              <span *ngIf="form.status !== 'Pending'">No actions available</span>
+            <td class="loan-amount">{{ formatCurrency(form.loanAmount || 0) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(form.status)">
+                {{ form.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button *ngIf="form.status === 'Pending'" 
+                        class="approve-btn" 
+                        (click)="approveOrRejectLoan(form.applicationId || '', 'Approved')"
+                        [@badgeAnimation]>
+                  <mat-icon>check</mat-icon> Approve
+                </button>
+                <button *ngIf="form.status === 'Pending'" 
+                        class="reject-btn" 
+                        (click)="approveOrRejectLoan(form.applicationId || '', 'Rejected')"
+                        [@badgeAnimation]>
+                  <mat-icon>close</mat-icon> Reject
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    
+    <!-- Recent Activity -->
+    <div class="activity-section" [@slideIn]>
+      <div class="section-header">
+        <h3 class="section-title">Recent Activity</h3>
+        <a href="#" class="view-all">
+          View All <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </div>
+      
+      <ul class="activity-list" [@listAnimation]="recentActivity.length">
+        <li *ngFor="let activity of recentActivity" class="activity-item">
+          <div class="activity-icon" [ngClass]="getStatusClass(activity.status)">
+            <mat-icon *ngIf="activity.status === 'Approved'">check_circle</mat-icon>
+            <mat-icon *ngIf="activity.status === 'Rejected'">cancel</mat-icon>
+            <mat-icon *ngIf="activity.status === 'Pending'">hourglass_empty</mat-icon>
+          </div>
+          <div class="activity-details">
+            <p class="activity-text">
+              Application <span class="activity-name">{{ activity.applicationId }}</span> was 
+              <span [ngClass]="getStatusClass(activity.status)">{{ activity.status.toLowerCase() }}</span>
+            </p>
+            <p class="activity-date">{{ activity.date }}</p>
+          </div>
+        </li>
+      </ul>
+      
+      <!-- Empty Activity State -->
+      <div *ngIf="recentActivity.length === 0" class="empty-state" [@fadeIn]>
+        <mat-icon class="empty-icon">history</mat-icon>
+        <h3 class="empty-title">No Recent Activity</h3>
+        <p class="empty-description">There hasn't been any activity in the system recently.</p>
+      </div>
+    </div>
   </div>
+</div>

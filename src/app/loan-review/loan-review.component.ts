@@ -5,13 +5,63 @@ import { LoanService, LoanForm } from '../../service/loan.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SuccessModalComponent } from '../success-modal/success-modal.component';
-
+import { MatIconModule } from '@angular/material/icon';
+import { 
+  trigger, 
+  transition, 
+  style, 
+  animate, 
+  keyframes ,
+  query,
+  stagger
+} from '@angular/animations';
 @Component({
   selector: 'app-loan-review',
   templateUrl: './loan-review.component.html',
   styleUrls: ['./loan-review.component.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, MatIconModule],
+  animations: [
+    // Fade In Animation
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('600ms cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+  
+    // Slide In Right Animation
+    trigger('slideInRight', [
+      transition(':enter', [
+        style({ transform: 'translateX(50px)', opacity: 0 }),
+        animate('600ms 200ms cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ transform: 'translateX(0)', opacity: 1 }))
+      ])
+    ]),
+  
+    // Fade In Up Animation
+    trigger('fadeInUp', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(30px)' }),
+        animate('500ms 300ms cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ]),
+  
+    // Stagger Slide Animation
+    trigger('staggerSlide', [
+      transition(':enter', [
+        query('button', [
+          style({ opacity: 0, transform: 'translateX(50px)' }),
+          stagger('100ms', [
+            animate('600ms cubic-bezier(0.4, 0, 0.2, 1)',
+              style({ opacity: 1, transform: 'translateX(0)' }))
+          ])
+        ])
+      ])
+    ])
+  ]
 })
 export class LoanReviewComponent implements OnInit {
   formData: any = null;
@@ -86,6 +136,12 @@ export class LoanReviewComponent implements OnInit {
   }
 
   editApplication(): void {
+
+    this.loanService.setLoanApplicationData({
+      formData: this.formData,
+      loanType: this.loanType
+    });
+
     this.router.navigate(['/user-dashboard/apply-form'], { 
       state: { 
         formData: this.formData,

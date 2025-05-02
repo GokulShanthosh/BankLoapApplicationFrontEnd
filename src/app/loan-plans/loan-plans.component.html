@@ -1,11 +1,32 @@
-<div class="loan-plans">
-    <h2>Available Loan Plans</h2>
-    <div class="plans-container">
-      <div class="plan-card" *ngFor="let plan of loanPlans">
-        <h3>{{plan.type}}</h3>
-        <p><strong>Interest Rate:</strong> {{plan.interestRate}}</p>
-        <p><strong>Max Amount:</strong> {{plan.maxAmount}}</p>
-        <p><strong>Tenure:</strong> {{plan.tenure}}</p>
+<div class="loan-plans-container" @fadeIn>
+  <h2 class="section-title">Explore Loan Options</h2>
+  
+  <div class="plans-grid">
+    <div class="plan-card" *ngFor="let plan of loanPlans" @staggerSlide>
+      <div class="card-header">
+        <h3>{{ plan.type }}</h3>
+        <div class="interest-badge">
+          {{ plan.interestRate }}
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="feature-item">
+          <mat-icon>currency_rupee</mat-icon>
+          <span>{{ plan.maxAmount }}</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ plan.tenure }}</span>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <button mat-raised-button color="primary" class="apply-button">
+          Learn More
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
       </div>
     </div>
   </div>
+</div>

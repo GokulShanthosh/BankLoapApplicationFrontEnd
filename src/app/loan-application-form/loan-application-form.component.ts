@@ -6,8 +6,21 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { LoanService } from '../../service/loan.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LoanReviewComponent } from '../loan-review/loan-review.component';
 import { SuccessModalComponent } from '../success-modal/success-modal.component';
+import { AuthService } from '../../service/auth.service';
+
+import { 
+  trigger, 
+  transition, 
+  style, 
+  animate, 
+  keyframes 
+} from '@angular/animations';
 
 // Custom validator for age (20-65 years)
 function ageRangeValidator(control: FormControl): { [key: string]: boolean } | null {
@@ -31,7 +44,36 @@ function ageRangeValidator(control: FormControl): { [key: string]: boolean } | n
   templateUrl: './loan-application-form.component.html',
   styleUrls: ['./loan-application-form.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    MatSnackBarModule],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('500ms ease-in', style({ opacity: 1 }))
+      ])
+    ]),
+    trigger('slideInRight', [
+      transition(':enter', [
+        style({ transform: 'translateX(50px)', opacity: 0 }),
+        animate('600ms cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ transform: 'translateX(0)', opacity: 1 }))
+      ])
+    ]),
+    trigger('pulse', [
+      transition('normal => hover', [
+        animate('1s ease-in-out', 
+          keyframes([
+            style({ transform: 'scale(1)', offset: 0 }),
+            style({ transform: 'scale(1.05)', offset: 0.5 }),
+            style({ transform: 'scale(1)', offset: 1 })
+          ])
+        )
+      ])
+    ])
+  ]
 })
 export class LoanApplicationFormComponent implements OnInit {
   loanForm!: FormGroup;
@@ -41,20 +83,25 @@ export class LoanApplicationFormComponent implements OnInit {
   showCompany = false;
   showSelf = false;
   showBusiness = false;
-
+  currentUser:any;
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private loanService: LoanService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.loanType = this.route.snapshot.queryParams['type'] || 'personal';
+    this.currentUser = this.authService.getCurrentUser();
     this.setLoanTitle();
     this.initializeForm();
+    
+    console.log(this.currentUser.email);
+    
   }
 
   setLoanTitle() {
@@ -76,7 +123,7 @@ export class LoanApplicationFormComponent implements OnInit {
         nationality: ['India', Validators.required],
         aadharNumber: ['', [Validators.required, Validators.pattern('^[0-9]{12}$')]],
         panNumber: ['', [Validators.required, Validators.pattern('[A-Z]{5}[0-9]{4}[A-Z]{1}')]],
-        emailId: ['', [Validators.email]],
+        emailId: [this.currentUser.email, [Validators.email]],
         phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         residentialAddress: ['', Validators.required],
         permanentAddress: ['', Validators.required],
@@ -111,10 +158,13 @@ export class LoanApplicationFormComponent implements OnInit {
 
     // Check for state data (when coming back from review)
     const navigation = this.router.getCurrentNavigation();
+    
+
     if (navigation?.extras?.state?.['formData']) {
       this.loanForm.patchValue(navigation.extras.state?.['formData']);
     }
   }
+
 
   // Getter methods for form groups
   get personalDetails() { return this.loanForm.get('personalDetails') as FormGroup; }

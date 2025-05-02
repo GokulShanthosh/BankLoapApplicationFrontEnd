@@ -1,21 +1,22 @@
-<div class="loan-form-container">
-    <div class="progress-bar-container">
-      <div class="progress-bar-wrapper">
-        <div class="progress-bar-vertical">
-          <div class="progress-bar-fill" [style.height]="(currentStep / 3) * 100 + '%'"></div>
-        </div>
-        <div class="progress-labels-vertical">
-          <div [class.active]="currentStep === 1">Personal Details</div>
-          <div [class.active]="currentStep === 2">Bank Details</div>
-          <div [class.active]="currentStep === 3">Loan Details</div>
-        </div>
-      </div>
+<div class="loan-form-container" @fadeIn>
+  <!-- Progress Indicator -->
+  <div class="progress-indicator">
+    <div class="progress-line"></div>
+    <div class="progress-fill" [style.width]="(currentStep-1)/2*100 + '%'"></div>
+    
+    <div *ngFor="let step of [1,2,3]; let i = index" 
+         [class.active]="currentStep > i"
+         class="progress-circle"
+         [@pulse]="currentStep === i+1 ? 'active' : 'inactive'">
+      <span>{{ i+1 }}</span>
+      <div class="progress-label">{{ ['Personal', 'Bank', 'Loan'][i] }} Details</div>
     </div>
-  
-    <div class="main-form-content">
-      <h2 class="text-center">{{loanTitle}}</h2>
-      
-      <ng-container *ngIf="currentStep === 1">
+  </div>
+
+   <div class="main-form-content">
+    <h2 class="text-center mb-4">{{loanTitle}}</h2>
+    <div  [@slideInRight]>
+    <ng-container *ngIf="currentStep === 1">
         <!-- Personal Details Form -->
         <!-- Include all personal details fields from your example -->
         <!-- Make sure to add proper error messages for each field -->
@@ -128,7 +129,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Email ID</label>
-              <input type="email" class="form-control" formControlName="emailId" />
+              <input type="email" class="form-control" formControlName="emailId" readonly value="{{this.currentUser.email}}" />
               <div
                 *ngIf="
                   personalDetails.get('emailId')?.invalid &&
@@ -306,12 +307,13 @@
             </div>
           </form>
       </ng-container>
-  
+    </div>
+
+    <div  [@slideInRight]>
       <ng-container *ngIf="currentStep === 2">
         <!-- Bank Details Form -->
         <!-- Include all bank details fields from your example -->
         <form [formGroup]="bankDetails">
-            <h2 class="text-center text-primary">Personal Loan Application</h2>
             <h4 class="form-section-title">Bank Details</h4>
             <div class="mb-3">
               <label class="form-label"> Bank Name</label>
@@ -375,12 +377,12 @@
             </div>
           </form>
       </ng-container>
-  
-      <ng-container *ngIf="currentStep === 3">
+    </div>
+    <div  [@slideInRight]>
+      <ng-container  *ngIf="currentStep === 3">
         <!-- Loan Details Form -->
         <!-- Include all loan details fields from your example -->
         <form [formGroup]="loanDetails">
-            <h2 class="text-center text-primary">Personal Loan Application</h2>
             <h4 class="form-section-title">Loan Details</h4>
             <div class="mb-3">
               <label class="form-label">Loan Amount</label>
@@ -438,16 +440,27 @@
             </div>
           </form>
       </ng-container>
-  
+    </div>
       <div class="form-navigation-buttons">
-        <button class="btn btn-secondary" (click)="previousStep()" [disabled]="currentStep === 1">
-          Previous
+        <button class="btn btn-secondary" 
+                (click)="previousStep()" 
+                [disabled]="currentStep === 1"
+                [@fadeIn]>
+          <mat-icon>arrow_back</mat-icon> Previous
         </button>
-        <button class="btn btn-primary" (click)="nextStep()" *ngIf="currentStep < 3">
-          Next
+        
+        <button *ngIf="currentStep < 3" 
+                class="btn btn-primary"
+                (click)="nextStep()"
+                [@pulse]="currentStepGroup.valid ? 'hover' : 'normal'">
+          Next <mat-icon>arrow_forward</mat-icon>
         </button>
-        <button class="btn btn-success" (click)="reviewApplication()" *ngIf="currentStep === 3">
-          Review Application
+        
+        <button *ngIf="currentStep === 3" 
+                class="btn btn-success"
+                (click)="reviewApplication()"
+                [@pulse]="loanForm.valid ? 'hover' : 'normal'">
+          <mat-icon>verified</mat-icon> Review Application
         </button>
       </div>
     </div>
