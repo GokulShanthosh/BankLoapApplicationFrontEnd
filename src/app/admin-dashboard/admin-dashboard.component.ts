@@ -27,8 +27,6 @@ import { trigger, transition, style, animate, query, stagger, keyframes, state }
     CommonModule, 
     FormsModule, 
     RouterModule,
-    RouterLink,
-    RouterLinkActive,
     MatButtonModule,
     MatCardModule,
     MatIconModule,

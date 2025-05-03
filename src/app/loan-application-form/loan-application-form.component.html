@@ -2,24 +2,22 @@
   <!-- Progress Indicator -->
   <div class="progress-indicator">
     <div class="progress-line"></div>
-    <div class="progress-fill" [style.width]="(currentStep-1)/2*100 + '%'"></div>
+    <div class="progress-fill" [style.width]="(currentStep-1)/3*100 + '%'"></div>
     
-    <div *ngFor="let step of [1,2,3]; let i = index" 
+    <div *ngFor="let step of [1,2,3,4]; let i = index" 
          [class.active]="currentStep > i"
          class="progress-circle"
          [@pulse]="currentStep === i+1 ? 'active' : 'inactive'">
       <span>{{ i+1 }}</span>
-      <div class="progress-label">{{ ['Personal', 'Bank', 'Loan'][i] }} Details</div>
+      <div class="progress-label">{{ ['Personal', 'Bank', 'Loan', 'Documents'][i] }} Details</div>
     </div>
   </div>
 
-   <div class="main-form-content">
+  <div class="main-form-content">
     <h2 class="text-center mb-4">{{loanTitle}}</h2>
     <div  [@slideInRight]>
     <ng-container *ngIf="currentStep === 1">
         <!-- Personal Details Form -->
-        <!-- Include all personal details fields from your example -->
-        <!-- Make sure to add proper error messages for each field -->
         <form [formGroup]="personalDetails">
             <h4 class="form-section-title">Personal Details</h4>
             <div class="mb-3">
@@ -312,7 +310,6 @@
     <div  [@slideInRight]>
       <ng-container *ngIf="currentStep === 2">
         <!-- Bank Details Form -->
-        <!-- Include all bank details fields from your example -->
         <form [formGroup]="bankDetails">
             <h4 class="form-section-title">Bank Details</h4>
             <div class="mb-3">
@@ -347,7 +344,7 @@
                 >
                 <span
                   *ngIf="bankDetails.get('accountNumber')?.errors?.['minlength']"
-                  >Account Number must be at least 8 digits.</span
+                  >Account Number must be at least 9 digits.</span
                 >
                 <span *ngIf="bankDetails.get('accountNumber')?.errors?.['pattern']"
                   >Account Number must contain only numbers.</span
@@ -368,20 +365,20 @@
                   >IFSC Number is required.</span
                 >
                 <span *ngIf="bankDetails.get('ifscCode')?.errors?.['minlength']"
-                  >IFSC Number must be at least 8 characters.</span
+                  >IFSC Code must be exactly 11 characters.</span
                 >
                 <span *ngIf="bankDetails.get('ifscCode')?.errors?.['pattern']"
-                  >IFSC Number must be alphanumeric.</span
+                  >IFSC Code must be alphanumeric.</span
                 >
               </div>
             </div>
           </form>
       </ng-container>
     </div>
-    <div  [@slideInRight]>
-      <ng-container  *ngIf="currentStep === 3">
+    
+    <div [@slideInRight]>
+      <ng-container *ngIf="currentStep === 3">
         <!-- Loan Details Form -->
-        <!-- Include all loan details fields from your example -->
         <form [formGroup]="loanDetails">
             <h4 class="form-section-title">Loan Details</h4>
             <div class="mb-3">
@@ -398,7 +395,12 @@
                 "
                 class="text-danger"
               >
-                Loan Amount is required.
+                <span *ngIf="loanDetails.get('loanAmount')?.errors?.['required']">
+                  Loan Amount is required.
+                </span>
+                <span *ngIf="loanDetails.get('loanAmount')?.errors?.['min']">
+                  Loan Amount must be at least 10,000.
+                </span>
               </div>
             </div>
             <div class="mb-3">
@@ -415,18 +417,30 @@
                 "
                 class="text-danger"
               >
-                Loan Tenure is required.
+                <span *ngIf="loanDetails.get('loanTenure')?.errors?.['required']">
+                  Loan Tenure is required.
+                </span>
+                <span *ngIf="loanDetails.get('loanTenure')?.errors?.['min']">
+                  Loan Tenure must be at least 1 year.
+                </span>
+                <span *ngIf="loanDetails.get('loanTenure')?.errors?.['max']">
+                  Loan Tenure cannot exceed 50 years.
+                </span>
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label">Purpose of Loan</label>
+            
+            <!-- Loan Purpose - Only for Personal Loans -->
+            <div class="mb-3" *ngIf="loanType === 'personal'">
+              <label class="form-label">Loan Purpose</label>
               <select class="form-select" formControlName="loanPurpose">
-                <option value="" disabled selected>Select purpose</option>
-                <option value="medical">Medical</option>
+                <option value="">Select Purpose</option>
                 <option value="education">Education</option>
-                <option value="wedding">Wedding</option>
+                <option value="medical">Medical</option>
                 <option value="travel">Travel</option>
+                <option value="wedding">Wedding</option>
                 <option value="debt_consolidation">Debt Consolidation</option>
+                <option value="home_improvement">Home Improvement</option>
+                <option value="other">Other</option>
               </select>
               <div
                 *ngIf="
@@ -438,30 +452,160 @@
                 Loan Purpose is required.
               </div>
             </div>
+            
+            <!-- Collateral Details - Only for Non-Personal Loans -->
+            <ng-container *ngIf="loanType !== 'personal'">
+              <div class="mb-3">
+                <label class="form-label">Collateral Type</label>
+                <select class="form-select" formControlName="collateralType">
+                  <option value="">Select Collateral Type</option>
+                  <option value="property">Property</option>
+                  <option value="vehicle">Vehicle</option>
+                  <option value="gold">Gold</option>
+                  <option value="fd">Fixed Deposit</option>
+                  <option value="stocks">Stocks/Bonds</option>
+                  <option value="other">Other</option>
+                </select>
+                <div
+                  *ngIf="
+                    loanDetails.get('collateralType')?.invalid &&
+                    loanDetails.get('collateralType')?.touched
+                  "
+                  class="text-danger"
+                >
+                  Collateral Type is required.
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Collateral Value</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="collateralValue"
+                />
+                <div
+                  *ngIf="
+                    loanDetails.get('collateralValue')?.invalid &&
+                    loanDetails.get('collateralValue')?.touched
+                  "
+                  class="text-danger"
+                >
+                  <span
+                    *ngIf="loanDetails.get('collateralValue')?.errors?.['required']"
+                  >
+                    Collateral Value is required.
+                  </span>
+                  <span *ngIf="loanDetails.get('collateralValue')?.errors?.['min']">
+                    Collateral Value must be at least 10,000.
+                  </span>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Collateral Description</label>
+                <textarea
+                  class="form-control"
+                  formControlName="collateralDescription"
+                ></textarea>
+                <div
+                  *ngIf="
+                    loanDetails.get('collateralDescription')?.invalid &&
+                    loanDetails.get('collateralDescription')?.touched
+                  "
+                  class="text-danger"
+                >
+                  Collateral Description is required.
+                </div>
+              </div>
+            </ng-container>
+            
           </form>
       </ng-container>
     </div>
-      <div class="form-navigation-buttons">
-        <button class="btn btn-secondary" 
-                (click)="previousStep()" 
-                [disabled]="currentStep === 1"
-                [@fadeIn]>
-          <mat-icon>arrow_back</mat-icon> Previous
-        </button>
-        
-        <button *ngIf="currentStep < 3" 
-                class="btn btn-primary"
-                (click)="nextStep()"
-                [@pulse]="currentStepGroup.valid ? 'hover' : 'normal'">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-        
-        <button *ngIf="currentStep === 3" 
-                class="btn btn-success"
-                (click)="reviewApplication()"
-                [@pulse]="loanForm.valid ? 'hover' : 'normal'">
-          <mat-icon>verified</mat-icon> Review Application
-        </button>
-      </div>
+    
+    <div [@slideInRight]>
+      <ng-container *ngIf="currentStep === 4">
+        <!-- Document Uploads Form -->
+        <form [formGroup]="documentUploads">
+          <h4 class="form-section-title">Document Uploads</h4>
+          
+          <div class="mb-3">
+            <label class="form-label">Income Proof</label>
+            <input
+              type="file"
+              class="form-control"
+              formControlName="incomeProof"
+              (change)="onIncomeProofChange($event)"
+              [accept]="allowedFileTypes"
+            />
+            <small class="form-text text-muted">
+              Accepted formats: PDF, JPG, JPEG, PNG (max 5MB)
+            </small>
+            <div
+              *ngIf="
+                documentUploads.get('incomeProof')?.invalid &&
+                documentUploads.get('incomeProof')?.touched
+              "
+              class="text-danger"
+            >
+              Income Proof document is required.
+            </div>
+          </div>
+          
+          <!-- Collateral Document Upload - Only for Non-Personal Loans -->
+          <div class="mb-3" *ngIf="requiresCollateral">
+            <label class="form-label">Collateral Document</label>
+            <input
+              type="file"
+              class="form-control"
+              formControlName="collateralDocument"
+              (change)="onCollateralDocChange($event)"
+              [accept]="allowedFileTypes"
+            />
+            <small class="form-text text-muted">
+              Accepted formats: PDF, JPG, JPEG, PNG (max 5MB)
+            </small>
+            <div
+              *ngIf="
+                documentUploads.get('collateralDocument')?.invalid &&
+                documentUploads.get('collateralDocument')?.touched
+              "
+              class="text-danger"
+            >
+              Collateral Document is required.
+            </div>
+          </div>
+          
+        </form>
+      </ng-container>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div class="form-navigation">
+      <button
+        *ngIf="currentStep > 1"
+        class="btn btn-outline-primary"
+        (click)="previousStep()"
+      >
+        <i class="fas fa-arrow-left"></i> Previous
+      </button>
+      
+      <button
+        *ngIf="currentStep < 4"
+        class="btn btn-primary"
+        (click)="nextStep()"
+      >
+        Next <i class="fas fa-arrow-right"></i>
+      </button>
+      
+      <button
+        *ngIf="currentStep === 4"
+        class="btn btn-success"
+        (click)="reviewApplication()"
+      >
+        Review Application <i class="fas fa-check"></i>
+      </button>
     </div>
   </div>
+</div>

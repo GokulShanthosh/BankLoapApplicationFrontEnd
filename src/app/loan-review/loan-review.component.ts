@@ -15,6 +15,7 @@ import {
   query,
   stagger
 } from '@angular/animations';
+
 @Component({
   selector: 'app-loan-review',
   templateUrl: './loan-review.component.html',
@@ -65,12 +66,14 @@ import {
 })
 export class LoanReviewComponent implements OnInit {
   formData: any = null;
-  loanType: string = '';
+  loanType: 'home' | 'personal' | 'vehicle' | 'business' = 'home';
   calculating = false;
   emi: number = 0;
   interestRate: number = 0;
   processingFee: number = 0;
   totalAmount: number = 0;
+  incomeProof!: File;
+  collateralProof!:File;
 
   constructor(
     private router: Router,
@@ -86,23 +89,20 @@ export class LoanReviewComponent implements OnInit {
   private loadApplicationData(): void {
     // Try getting data from router state first
     const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras?.state as { formData: any, loanType: string };
+    const state = navigation?.extras?.state as { formData: any, loanType: 'home' | 'personal' | 'vehicle' | 'business' };
     
-    if (state?.formData) {
-      this.formData = state.formData;
-      this.loanType = state.loanType;
-      this.calculateLoanDetails();
-    } else {
       // Fallback to service if no state data
       const serviceData = this.loanService.getLoanApplicationData();
       if (serviceData) {
         this.formData = serviceData.formData;
         this.loanType = serviceData.loanType;
+        this.incomeProof = serviceData.files.incomeProof;
+        this.collateralProof = serviceData.files.collateralDoc;
         this.calculateLoanDetails();
       } else {
         this.handleNoDataError();
       }
-    }
+    
   }
 
   private handleNoDataError(): void {
@@ -136,7 +136,6 @@ export class LoanReviewComponent implements OnInit {
   }
 
   editApplication(): void {
-
     this.loanService.setLoanApplicationData({
       formData: this.formData,
       loanType: this.loanType
@@ -158,55 +157,66 @@ export class LoanReviewComponent implements OnInit {
 
   submitApplication(): void {
     const applicationId = this.generateApplicationId();
-    
-    const formattedData: LoanForm = {
-      applicationId: applicationId,
-      applicantName: this.formData.personalDetails.applicantName,
-      dob: new Date(this.formData.personalDetails.dob),
-      nationality: this.formData.personalDetails.nationality,
-      aadharNumber: this.formData.personalDetails.aadharNumber,
-      panNumber: this.formData.personalDetails.panNumber,
-      emailId: this.formData.personalDetails.emailId,
-      phoneNumber: this.formData.personalDetails.phoneNumber,
-      residentialAddress: this.formData.personalDetails.residentialAddress,
-      permanentAddress: this.formData.personalDetails.permanentAddress,
-      employmentType: this.formData.personalDetails.employmentType,
-      income: this.formData.personalDetails.income,
-      
-      // Employment-specific fields
-      ...(this.formData.personalDetails.employmentType === 'salaried' && {
-        companyName: this.formData.personalDetails.companyName
-      }),
-      ...(this.formData.personalDetails.employmentType === 'self_employed' && {
-        selfEmploymentType: this.formData.personalDetails.selfEmploymentType
-      }),
-      ...(this.formData.personalDetails.employmentType === 'business' && {
-        bussinessType: this.formData.personalDetails.businessType
-      }),
-      
-      // Bank details
-      bankName: this.formData.bankDetails.bankName,
-      accountNumber: this.formData.bankDetails.accountNumber,
-      ifscCode: this.formData.bankDetails.ifscCode,
-      
-      // Loan details
-      loanAmount: this.formData.loanDetails.loanAmount,
-      loanTenure: this.formData.loanDetails.loanTenure,
-      loanPurpose: this.formData.loanDetails.loanPurpose,
-      // loanType: this.loanType,
-      
-      // Calculated values
-      // emi: this.emi,
-      // interestRate: this.interestRate,
-      // processingFee: this.processingFee,
-      // totalAmount: this.totalAmount,
-      status: 'Pending',
-      createdAt: new Date() // Now matches Date type in interface
-    };
+    const formDataToSend = new FormData();
 
-    this.loanService.createLoanApplication(formattedData).subscribe({
+    formDataToSend.append('applicationId', applicationId);
+    formDataToSend.append('applicantName', this.formData.personalDetails.applicantName);
+    formDataToSend.append('dob', this.formData.personalDetails.dob);
+    formDataToSend.append('gender', this.formData.personalDetails.gender);
+    formDataToSend.append('nationality', this.formData.personalDetails.nationality);
+    formDataToSend.append('aadharNumber', this.formData.personalDetails.aadharNumber);
+    formDataToSend.append('panNumber', this.formData.personalDetails.panNumber);
+    formDataToSend.append('emailId', this.formData.personalDetails.emailId);
+    formDataToSend.append('phoneNumber', this.formData.personalDetails.phoneNumber);
+    formDataToSend.append('residentialAddress', this.formData.personalDetails.residentialAddress);
+    formDataToSend.append('permanentAddress', this.formData.personalDetails.permanentAddress);
+    formDataToSend.append('employmentType', this.formData.personalDetails.employmentType);
+    formDataToSend.append('income', this.formData.personalDetails.income.toString());
+    formDataToSend.append('bankName', this.formData.bankDetails.bankName);
+    formDataToSend.append('accountNumber', this.formData.bankDetails.accountNumber);
+    formDataToSend.append('ifscCode', this.formData.bankDetails.ifscCode);
+    formDataToSend.append('loanAmount', this.formData.loanDetails.loanAmount.toString());
+    formDataToSend.append('loanTenure', this.formData.loanDetails.loanTenure.toString());
+    formDataToSend.append('loanType', this.loanType);
+    formDataToSend.append('status', 'Pending');
+    formDataToSend.append('createdAt', new Date().toISOString());
+
+    // Optional: Loan purpose (for personal loan)
+    if (this.formData.loanDetails.loanPurpose) {
+      formDataToSend.append('loanPurpose', this.formData.loanDetails.loanPurpose);
+    }
+
+    // Employment-specific fields
+    const empType = this.formData.personalDetails.employmentType;
+    if (empType === 'salaried') {
+      formDataToSend.append('companyName', this.formData.personalDetails.companyName);
+    } else if (empType === 'self_employed') {
+      formDataToSend.append('selfEmploymentType', this.formData.personalDetails.selfEmploymentType);
+    } else if (empType === 'business') {
+      formDataToSend.append('businessType', this.formData.personalDetails.businessType);
+    }
+
+    // Collateral (for non-personal loans)
+    if (this.loanType !== 'personal') {
+      formDataToSend.append('collateralType', this.formData.loanDetails.collateralType);
+      formDataToSend.append('collateralValue', this.formData.loanDetails.collateralValue.toString());
+      formDataToSend.append('collateralDescription', this.formData.loanDetails.collateralDescription);
+    }
+
+    console.log(this.formData);  
+    // File uploads
+    if (this.incomeProof) {
+      
+      
+      formDataToSend.append('incomeProof', this.incomeProof);
+    }
+
+    if (this.loanType !== 'personal' && this.collateralProof) {
+      formDataToSend.append('collateralDocument', this.collateralProof);
+    }
+
+    this.loanService.createLoanApplication(formDataToSend).subscribe({
       next: (response) => {
-        // this.loanService.clearLoanApplicationData();
         this.showSuccessModal(applicationId);
       },
       error: (error) => {

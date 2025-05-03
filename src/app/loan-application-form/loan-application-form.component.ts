@@ -2,7 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule, Navigation } from '@angular/router';
 import { LoanService } from '../../service/loan.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,7 +22,6 @@ import {
   keyframes 
 } from '@angular/animations';
 
-// Custom validator for age (20-65 years)
 function ageRangeValidator(control: FormControl): { [key: string]: boolean } | null {
   if (control.value) {
     const today = new Date();
@@ -83,7 +82,13 @@ export class LoanApplicationFormComponent implements OnInit {
   showCompany = false;
   showSelf = false;
   showBusiness = false;
-  currentUser:any;
+  currentUser: any;
+  requiresCollateral = false;
+  allowedFileTypes = '.pdf,.jpg,.jpeg,.png';
+  maxFileSize = 5 * 1024 * 1024;
+  incomeProofFile: File | null = null;
+  collateralDocFile: File | null = null;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -99,9 +104,6 @@ export class LoanApplicationFormComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
     this.setLoanTitle();
     this.initializeForm();
-    
-    console.log(this.currentUser.email);
-    
   }
 
   setLoanTitle() {
@@ -112,10 +114,11 @@ export class LoanApplicationFormComponent implements OnInit {
       business: 'Business Loan Application'
     };
     this.loanTitle = titles[this.loanType as keyof typeof titles] || 'Loan Application';
+    this.requiresCollateral = this.loanType !== 'personal';
   }
 
   initializeForm() {
-    this.loanForm = this.fb.group({
+    const formConfig: any = {
       personalDetails: this.fb.group({
         applicantName: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(100)]],
         dob: ['', [Validators.required, ageRangeValidator]],
@@ -135,44 +138,43 @@ export class LoanApplicationFormComponent implements OnInit {
       }),
       bankDetails: this.fb.group({
         bankName: ['', Validators.required],
-        accountNumber: ['', [
-          Validators.required,
-          Validators.minLength(9),
-          Validators.maxLength(18),
-          Validators.pattern('^[0-9]+$')
-        ]],
-        ifscCode: ['', [
-          Validators.required,
-          Validators.minLength(11),
-          Validators.maxLength(11),
-          Validators.pattern('^[A-Za-z0-9]+$')
-        ]],
+        accountNumber: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(18), Validators.pattern('^[0-9]+$')]],
+        ifscCode: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11), Validators.pattern('^[A-Za-z0-9]+$')]],
       }),
       loanDetails: this.fb.group({
         loanAmount: ['', [Validators.required, Validators.min(10000)]],
         loanTenure: ['', [Validators.required, Validators.min(1), Validators.max(50)]],
-        loanPurpose: ['', Validators.required],
         loanType: [this.loanType, Validators.required]
       }),
-    });
+      documentUploads: this.fb.group({
+        incomeProof: ['', Validators.required]
+      })
+    };
 
-    // Check for state data (when coming back from review)
-    const navigation = this.router.getCurrentNavigation();
-    
+    if (this.loanType === 'personal') {
+      formConfig.loanDetails.addControl('loanPurpose', new FormControl('', Validators.required));
+    } else {
+      formConfig.loanDetails.addControl('collateralType', new FormControl('', Validators.required));
+      formConfig.loanDetails.addControl('collateralValue', new FormControl('', [Validators.required, Validators.min(10000)]));
+      formConfig.loanDetails.addControl('collateralDescription', new FormControl('', Validators.required));
+      formConfig.documentUploads.addControl('collateralDocument', new FormControl('', Validators.required));
+    }
 
+    this.loanForm = this.fb.group(formConfig);
+
+    const navigation: Navigation | null = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['formData']) {
-      this.loanForm.patchValue(navigation.extras.state?.['formData']);
+      this.loanForm.patchValue(navigation.extras.state['formData']);
     }
   }
 
-
-  // Getter methods for form groups
   get personalDetails() { return this.loanForm.get('personalDetails') as FormGroup; }
   get bankDetails() { return this.loanForm.get('bankDetails') as FormGroup; }
   get loanDetails() { return this.loanForm.get('loanDetails') as FormGroup; }
+  get documentUploads() { return this.loanForm.get('documentUploads') as FormGroup; }
 
   nextStep() {
-    if (this.currentStep < 3 && this.currentStepGroup.valid) {
+    if (this.currentStep < 4 && this.currentStepGroup.valid) {
       this.currentStep++;
     } else {
       this.markFormGroupTouched(this.currentStepGroup);
@@ -186,10 +188,11 @@ export class LoanApplicationFormComponent implements OnInit {
   }
 
   get currentStepGroup(): FormGroup {
-    switch(this.currentStep) {
+    switch (this.currentStep) {
       case 1: return this.personalDetails;
       case 2: return this.bankDetails;
       case 3: return this.loanDetails;
+      case 4: return this.documentUploads;
       default: return this.personalDetails;
     }
   }
@@ -209,7 +212,6 @@ export class LoanApplicationFormComponent implements OnInit {
     this.showSelf = employmentType === 'self_employed';
     this.showBusiness = employmentType === 'business';
 
-    // Set validators dynamically
     ['companyName', 'selfEmploymentType', 'businessType'].forEach(field => {
       const control = this.personalDetails.get(field);
       control?.clearValidators();
@@ -234,49 +236,77 @@ export class LoanApplicationFormComponent implements OnInit {
     }
   }
 
+  onIncomeProofChange(event: Event) {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      if (file.size > this.maxFileSize) {
+        this.snackBar.open('File is too large. Maximum size is 5MB', 'Close', { duration: 3000 });
+        fileInput.value = '';
+        return;
+      }
+      this.incomeProofFile = file;
+    }
+  }
+
+  onCollateralDocChange(event: Event) {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      if (file.size > this.maxFileSize) {
+        this.snackBar.open('File is too large. Maximum size is 5MB', 'Close', { duration: 3000 });
+        fileInput.value = '';
+        return;
+      }
+      this.collateralDocFile = file;
+    }
+  }
+
+  
+
   reviewApplication() {
-    // Mark all form controls as touched to show validation errors
     this.markFormGroupTouched(this.loanForm);
-    console.log(this.loanForm)  ;
-    
     if (this.loanForm.valid) {
-      // Option 1: Use a service to store the form data
-      this.loanService.setLoanApplicationData({
-        formData: this.loanForm.getRawValue(),
-        loanType: this.loanType
-      });
-      
-      // Then navigate without state
-      this.router.navigate(['/user-dashboard/review']);
-      
-      // Option 2: If you prefer using state, make sure it's passed correctly
-      /* 
-      this.router.navigateByUrl('/user-dashboard/review', { 
-        state: { 
-          formData: this.loanForm.getRawValue(),
-          loanType: this.loanType
+      const formData = new FormData();
+      const formValue = this.loanForm.getRawValue();
+
+      Object.entries(formValue).forEach(([key, value]) => {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+            formData.append(`${key}.${nestedKey}`, String(nestedValue ?? ''));
+          });
+        } else {
+          formData.append(key, String(value ?? ''));
         }
       });
-      */
-    } else {
-      // Show error for invalid form
-      this.snackBar.open('Please fill all required fields correctly', 'Close', {
-        duration: 3000
-      });
+
+      if (this.incomeProofFile) formData.append('incomeProofFile', this.incomeProofFile);
+      if (this.requiresCollateral && this.collateralDocFile) formData.append('collateralDocFile', this.collateralDocFile);
+
+      console.log(this.incomeProofFile);
+      console.log(this.collateralDocFile);
       
-      // Navigate to the first invalid step
-      if (this.personalDetails.invalid) {
-        this.currentStep = 1;
-      } else if (this.bankDetails.invalid) {
-        this.currentStep = 2;
-      } else if (this.loanDetails.invalid) {
-        this.currentStep = 3;
-      }
+      this.loanService.setLoanApplicationData({
+        formData: formValue,
+        loanType: this.loanType,
+        files: {
+          incomeProof: this.incomeProofFile,
+          collateralDoc: this.collateralDocFile
+        }
+      });
+
+      this.router.navigate(['/user-dashboard/review']);
+    } else {
+      this.snackBar.open('Please fill all required fields correctly', 'Close', { duration: 3000 });
+      if (this.personalDetails.invalid) this.currentStep = 1;
+      else if (this.bankDetails.invalid) this.currentStep = 2;
+      else if (this.loanDetails.invalid) this.currentStep = 3;
+      else if (this.documentUploads.invalid) this.currentStep = 4;
     }
   }
 
   showSuccessModal() {
-    const dialogRef = this.dialog.open(SuccessModalComponent, {
+    this.dialog.open(SuccessModalComponent, {
       width: '400px',
       data: { 
         title: 'Application Submitted',
