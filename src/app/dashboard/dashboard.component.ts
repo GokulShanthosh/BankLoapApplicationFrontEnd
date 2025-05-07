@@ -1,5 +1,5 @@
 // dashboard.component.ts
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
@@ -81,7 +81,7 @@ import { trigger, transition, style, animate, query, stagger, keyframes, state }
   ]
 })
 
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   loanAmount = 500000;
   tenure = 5;
   interestRate = 8.5;
@@ -90,6 +90,18 @@ export class DashboardComponent {
   currentUser: any;
   showScrollButton = false;
   hoverState: 'normal' | 'hover' = 'normal'; 
+
+  ngOnInit(): void {
+    if(this.authService.isAuthenticated() && this.authService.getCurrentUser()?.role === 'admin'){
+      console.log(this.authService.getCurrentUser());
+       
+      this.router.navigate(['/admin-dashboard']);
+    }
+    
+    if(this.authService.isAuthenticated() && this.authService.getCurrentUser()?.role === 'user'){
+      this.router.navigate(['/user-dashboard']);
+    }
+  }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {

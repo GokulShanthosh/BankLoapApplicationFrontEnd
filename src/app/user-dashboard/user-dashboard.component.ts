@@ -1,5 +1,5 @@
 // user-dashboard.component.ts
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLink, RouterLinkActive, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
@@ -90,7 +90,7 @@ import { trigger, transition, style, animate, query, stagger, keyframes, state }
   ]
 })
 
-export class UserDashboardComponent {
+export class UserDashboardComponent implements OnInit{
   loanAmount = 500000;
   tenure = 5;
   interestRate = 8.5;
@@ -169,6 +169,14 @@ export class UserDashboardComponent {
     this.calculateEMI();
     // console.log(this.currentUser);
     
+  }
+
+  ngOnInit(): void {
+    if(this.authService.isAuthenticated() && this.authService.getCurrentUser()?.role === 'admin'){
+      console.log(this.authService.getCurrentUser());
+       
+      this.router.navigate(['/admin-dashboard']);
+    }
   }
 
   calculateEMI() {
