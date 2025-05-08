@@ -1,9 +1,12 @@
 <div class="loan-selection">
   <h2>Select Loan Type</h2>
   <div class="loan-options">
-    <div class="loan-option" *ngFor="let loan of loanTypes"
-         (click)="selectLoanType(loan.id)">
-      {{loan.name}}
+    <div
+      class="loan-option"
+      *ngFor="let loan of loanTypes"
+      (click)="selectLoanType(loan.id)"
+    >
+      {{ loan.name }}
     </div>
   </div>
 </div>

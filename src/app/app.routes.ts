@@ -14,6 +14,16 @@ export const routes: Routes = [
       import('./auth/login/login.component').then((c) => c.LoginComponent),
   },
   {
+    path: 'application-form',
+    loadComponent: () =>
+      import('./loan-application-form/loan-application-form.component').then((c) => c.LoanApplicationFormComponent),
+  },
+  {
+    path: 'review-form',
+    loadComponent: () =>
+      import('./loan-review/loan-review.component').then((c) => c.LoanReviewComponent),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/signup/signup.component').then((c) => c.SignupComponent),
