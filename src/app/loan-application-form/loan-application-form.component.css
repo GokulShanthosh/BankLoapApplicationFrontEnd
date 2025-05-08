@@ -20,59 +20,72 @@
   /* Updated Progress Indicator */
   .progress-indicator {
     display: flex;
-    justify-content: space-between;
-    position: relative;
-    margin: 2rem 0;
-    padding: 0 1rem;
+    flex-direction: column; /* Stack circles vertically */
+    align-items: center; /* Center circles horizontally */
+    position: fixed; /* Fix position to the left */
+    top: 50%;
+    left: 20px; /* Adjust as needed */
+    transform: translateY(-50%); /* Vertically center the whole bar */
+    margin: 0; /* Remove default margin */
+    padding: 0;
+    height: auto; /* Adjust height to content */
   }
   
   .progress-line {
     position: absolute;
-    height: 4px;
+    width: 4px; /* Line is now vertical */
+    height: 100%; /* Full height of the container */
     background: #e0e0e0;
-    top: 20px;
-    left: 0;
-    right: 0;
+    top: 0;
+    left: 50%; /* Center the line horizontally */
+    transform: translateX(-50%); /* Correct horizontal centering */
     z-index: 0;
   }
-  
+
   .progress-fill {
     position: absolute;
-    height: 4px;
+    width: 4px; /* Fill is also vertical */
+    height: 0%;
     background: #3498db;
-    transition: width 0.5s ease;
+    bottom: 0; /* Start from the bottom and grow upwards */
+    left: 50%;
+    transform: translateX(-50%);
+    transition: height 0.5s ease;
     z-index: 1;
   }
   
-  .progress-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: #666;
-    z-index: 2;
-    transition: all 0.3s ease;
-  }
+.progress-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #666;
+  z-index: 2;
+  transition: all 0.3s ease;
+  margin: 1rem 0; /* Add vertical margin between circles */
+  position: relative;
+}
   
-  .progress-circle.active {
-    border-color: #3498db;
-    color: #3498db;
-    background: #e3f2fd;
-  }
+.progress-circle.active {
+  border-color: #3498db;
+  color: #3498db;
+  background: #e3f2fd;
+}
   
-  .progress-label {
-    position: absolute;
-    top: 50px;
-    white-space: nowrap;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  
+.progress-label {
+  position: absolute;
+  left: calc(100% + 1rem); /* Position to the right of the circle */
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: #666;
+}
   /* Form Styling */
   .loan-form-container {
     max-width: 800px;
